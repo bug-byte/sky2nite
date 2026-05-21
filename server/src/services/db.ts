@@ -29,7 +29,7 @@ export async function initDb(): Promise<void> {
   } catch (err: any) {
     log.warn('Could not connect to PostgreSQL:', err.message);
     log.warn('Set DATABASE_URL in server/.env and ensure PostgreSQL is running.');
-    log.warn('The "My Observations" feature will be unavailable until a connection is established.');
+    log.warn('Some features will be unavailable until a connection is established.');
   }
 }
 
