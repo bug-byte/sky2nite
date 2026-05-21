@@ -1,4 +1,4 @@
-import astro from 'astronomy-engine';
+import * as astro from 'astronomy-engine';
 import type { VisibilityWindow } from '../types/index.js';
 
 // Calculate sunset and sunrise times for a given location and date

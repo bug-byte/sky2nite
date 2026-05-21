@@ -50,15 +50,17 @@ cp server/.env.example server/.env
 **2. Build and start**
 
 ```bash
-docker compose up --build
+docker compose --env-file server/.env up --build
 ```
+
+The `--env-file server/.env` flag makes your `VITE_GOOGLE_MAPS_API_KEY` (and any other `VITE_*` vars) available to the build step so Vite can bake them into the client bundle.
 
 The app is available at **http://localhost:3000**.
 
 To run in the background:
 
 ```bash
-docker compose up --build -d
+docker compose --env-file server/.env up --build -d
 ```
 
 To stop:

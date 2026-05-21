@@ -16,11 +16,8 @@ services:
   app:
     build:
       context: .
-      env_file:
-        - path: ./server/.env
-          required: false
       args:
-        - VITE_GOOGLE_MAPS_API_KEY
+        VITE_GOOGLE_MAPS_API_KEY: ${VITE_GOOGLE_MAPS_API_KEY:-}
     ports:
       - "3000:3000"
     depends_on:
