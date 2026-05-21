@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useRef } from 'react'
 import { useTranslation } from 'react-i18next'
 import {
   AppBar,
@@ -13,12 +13,20 @@ import {
   DialogContentText,
   Link,
   Button,
+  Paper,
+  FormControl,
+  InputLabel,
+  Select,
+  MenuItem,
+  OutlinedInput,
+  Chip,
 } from '@mui/material'
-import { TravelExplore as TravelExploreIcon, InfoOutlined as InfoOutlinedIcon } from '@mui/icons-material'
-import LocationInput from './components/LocationInput'
+import type { SelectChangeEvent } from '@mui/material'
+import { TravelExplore as TravelExploreIcon, InfoOutlined as InfoOutlinedIcon, FilterAltOutlined as FilterAltOutlinedIcon, Search as SearchIcon } from '@mui/icons-material'
+import LocationInput, { type LocationInputHandle } from './components/LocationInput'
 import FilterControls, { type Filters } from './components/FilterControls'
 import ObjectsList from './components/ObjectsList'
-import { useVisibleObjects } from './hooks/useVisibleObjects'
+import { useVisibleObjects, useAvailableTags } from './hooks/useVisibleObjects'
 import type { SearchRequest } from './types/api'
 
 function App() {
@@ -35,9 +43,12 @@ function App() {
     objectTypes: [],
     minAltitude: 15,
   })
+  const locationRef = useRef<LocationInputHandle>(null)
+  const [locationLoading, setLocationLoading] = useState(false)
   const { t, i18n } = useTranslation()
 
   const { data, isLoading, error } = useVisibleObjects(searchRequest, searchRequest !== null)
+  const { data: availableTags = [] } = useAvailableTags()
 
   // When a page loads successfully, record its nextCursor so the next page is available.
   const nextCursor = data?.pagination?.nextCursor ?? null
@@ -93,6 +104,11 @@ function App() {
     }
   }
 
+  const handleObjectTypesChange = (event: SelectChangeEvent<string[]>) => {
+    const value = event.target.value
+    handleFiltersChange({ ...filters, objectTypes: typeof value === 'string' ? value.split(',') : value })
+  }
+
   const handlePageChange = (nextPage: number) => {
     if (!searchRequest || nextPage < 1 || cursors[nextPage - 1] === undefined) return
     setPage(nextPage)
@@ -116,7 +132,7 @@ function App() {
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
       <AppBar 
-        position="static" 
+        position="sticky" 
         elevation={0}
         sx={{
           background: 'rgba(15, 23, 41, 0.6)',
@@ -155,13 +171,80 @@ function App() {
         </Toolbar>
       </AppBar>
 
-      <Container maxWidth="lg" sx={{ mt: 4, mb: 4, flex: 1 }}>
+      <Container maxWidth="xl" sx={{ mt: 4, mb: 4, flex: 1, px: { xs: 2, md: 3 } }}>
         <Typography variant="body1" color="text.secondary" paragraph>
           {t('MESSAGE.APP_DESCRIPTION')}
         </Typography>
 
-        <LocationInput onLocationChange={handleLocationChange} />
-        <FilterControls filters={filters} onFiltersChange={handleFiltersChange} />
+        <Box sx={{ display: 'flex', gap: 2, alignItems: 'stretch', flexDirection: { xs: 'column', md: 'row' }, mb: 2 }}>
+          <Box sx={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column' }}>
+            <LocationInput
+              ref={locationRef}
+              onLocationChange={handleLocationChange}
+              onLoadingChange={setLocationLoading}
+            />
+          </Box>
+          <Box sx={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column' }}>
+            <FilterControls filters={filters} onFiltersChange={handleFiltersChange} />
+          </Box>
+          <Box sx={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column' }}>
+            <Paper
+              sx={{
+                padding: '1.5rem',
+                height: '100%',
+                background: 'rgba(15, 23, 41, 0.4)',
+                backdropFilter: 'blur(12px)',
+                border: '1px solid rgba(255, 255, 255, 0.3)',
+                borderRadius: '1rem',
+                boxShadow: '0 0.5rem 2rem 0 rgba(0, 0, 0, 0.37)',
+                boxSizing: 'border-box',
+              }}
+            >
+              <Typography variant="h6" gutterBottom sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                <FilterAltOutlinedIcon fontSize="small" sx={{ position: 'relative', top: '-0.1em' }} />
+                {t('LABEL.SEARCH_FILTERS')}
+              </Typography>
+              <FormControl fullWidth>
+                <InputLabel>{t('LABEL.OBJECT_TYPES')}</InputLabel>
+                <Select
+                  multiple
+                  value={filters.objectTypes}
+                  onChange={handleObjectTypesChange}
+                  input={<OutlinedInput label={t('LABEL.OBJECT_TYPES')} />}
+                  renderValue={(selected) => (
+                    <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
+                      {(selected as string[]).map((value) => (
+                        <Chip key={value} label={value} size="small" />
+                      ))}
+                    </Box>
+                  )}
+                >
+                  {availableTags.map((tag: string) => (
+                    <MenuItem key={tag} value={tag}>
+                      {tag.replace(/_/g, ' ')}
+                    </MenuItem>
+                  ))}
+                </Select>
+                <Typography variant="caption" color="text.secondary" sx={{ mt: 1 }}>
+                  {t('LABEL.OBJECT_TYPES_HELP')}
+                </Typography>
+              </FormControl>
+            </Paper>
+          </Box>
+        </Box>
+
+        <Box sx={{ display: 'flex', gap: 2, mb: 2 }}>
+          <Button
+            variant="contained"
+            size="large"
+            fullWidth
+            onClick={() => locationRef.current?.submit()}
+            disabled={locationLoading}
+          >
+            <SearchIcon fontSize="small" sx={{ mr: 0.75, position: 'relative', top: '-0.1em' }} />
+            {t('COMMAND.SEARCH_SKY_OBJECTS')}
+          </Button>
+        </Box>
 
         {searchRequest && (
           <ObjectsList

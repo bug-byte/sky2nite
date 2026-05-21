@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, forwardRef, useImperativeHandle } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
   TextField,
@@ -14,12 +14,21 @@ import { LocationOnOutlined as LocationOnOutlinedIcon, MyLocation as MyLocationI
 
 interface LocationInputProps {
   onLocationChange: (latitude: number, longitude: number) => void;
+  onLoadingChange?: (loading: boolean) => void;
+}
+
+export interface LocationInputHandle {
+  submit: () => void;
+  useCurrentLocation: () => void;
 }
 
 // Get Google API key from environment or use a placeholder
 const GOOGLE_API_KEY = import.meta.env.VITE_GOOGLE_MAPS_API_KEY || '';
 
-export default function LocationInput({ onLocationChange }: LocationInputProps) {
+const LocationInput = forwardRef<LocationInputHandle, LocationInputProps>(function LocationInput(
+  { onLocationChange, onLoadingChange },
+  ref
+) {
   const [latitude, setLatitude] = useState<string>('');
   const [longitude, setLongitude] = useState<string>('');
   const [address, setAddress] = useState<string>('');
@@ -125,20 +134,30 @@ export default function LocationInput({ onLocationChange }: LocationInputProps) 
     onLocationChange(lat, lon);
   };
 
+  useImperativeHandle(ref, () => ({
+    submit: handleManualSubmit,
+    useCurrentLocation: handleUseCurrentLocation,
+  }));
+
+  useEffect(() => {
+    onLoadingChange?.(loading);
+  }, [loading, onLoadingChange]);
+
   return (
     <Paper
       sx={{
         padding: '1.5rem',
-        marginBottom: '1.5rem',
+        height: '100%',
         background: 'rgba(15, 23, 41, 0.4)',
         backdropFilter: 'blur(12px)',
         border: '1px solid rgba(255, 255, 255, 0.3)',
         borderRadius: '1rem',
         boxShadow: '0 0.5rem 2rem 0 rgba(0, 0, 0, 0.37)',
+        boxSizing: 'border-box',
       }}
     >
       <Typography variant="h6" gutterBottom sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-        <LocationOnOutlinedIcon fontSize="small" />
+        <LocationOnOutlinedIcon fontSize="small" sx={{ position: 'relative', top: '-0.1em' }} />
         {t('LABEL.OBSERVATION_LOCATION')}
       </Typography>
       <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
@@ -188,32 +207,25 @@ export default function LocationInput({ onLocationChange }: LocationInputProps) 
           />
         </Box>
 
-        <Box sx={{ display: 'flex', gap: 1 }}>
-          <Button
-            variant="contained"
-            onClick={handleManualSubmit}
-            disabled={!latitude || !longitude || loading}
-            fullWidth
-          >
-            {t('COMMAND.SEARCH_SKY_OBJECTS')}
-          </Button>
-          <Button
-            variant="outlined"
-            onClick={handleUseCurrentLocation}
-            disabled={loading}
-            sx={{ minWidth: 180 }}
-          >
-            <MyLocationIcon fontSize="small" sx={{ mr: 0.75 }} />
-            {loading ? t('COMMAND.GETTING_LOCATION') : t('COMMAND.USE_MY_LOCATION')}
-          </Button>
-        </Box>
-
         {error && (
           <Alert severity="error" onClose={() => setError('')}>
             {error}
           </Alert>
         )}
+
+        <Button
+          variant="outlined"
+          onClick={handleUseCurrentLocation}
+          disabled={loading}
+          fullWidth
+          sx={{ textTransform: 'none' }}
+        >
+          <MyLocationIcon fontSize="small" sx={{ mr: 0.75, position: 'relative', top: '-0.1em' }} />
+          {loading ? t('COMMAND.GETTING_LOCATION') : t('COMMAND.USE_MY_LOCATION')}
+        </Button>
       </Stack>
     </Paper>
   );
-}
+});
+
+export default LocationInput;

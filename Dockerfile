@@ -1,0 +1,42 @@
+# ── Stage 1: Build client ────────────────────────────────────────────────────
+FROM node:22-alpine AS client-builder
+WORKDIR /app/client
+
+COPY client/package*.json ./
+RUN npm ci
+
+COPY client/ ./
+ARG VITE_GOOGLE_MAPS_API_KEY
+ENV VITE_GOOGLE_MAPS_API_KEY=$VITE_GOOGLE_MAPS_API_KEY
+RUN npm run build
+
+# ── Stage 2: Build server ────────────────────────────────────────────────────
+FROM node:22-alpine AS server-builder
+WORKDIR /app/server
+
+COPY server/package*.json ./
+RUN npm ci
+
+COPY server/ ./
+RUN npm run build
+
+# ── Stage 3: Production image ────────────────────────────────────────────────
+FROM node:22-alpine AS production
+WORKDIR /app
+
+# Install only production dependencies
+COPY server/package*.json ./
+RUN npm ci --omit=dev
+
+# Copy compiled server
+COPY --from=server-builder /app/server/dist ./dist
+
+# Copy built client into the directory the server will serve
+COPY --from=client-builder /app/client/dist ./public
+
+ENV NODE_ENV=production
+ENV PORT=3000
+
+EXPOSE 3000
+
+CMD ["node", "dist/index.js"]

@@ -2,10 +2,16 @@ import { randomUUID } from 'crypto';
 import cors from 'cors';
 import dotenv from 'dotenv';
 import express from 'express';
+import path from 'path';
+import { fileURLToPath } from 'url';
 import { objectsRouter } from './api/objects/objectsRouter.js';
+import { initDb } from './services/db.js';
 import getLogger from './util/getLogger.js';
 
 dotenv.config();
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 const log = getLogger('SERVER');
 const app = express();
@@ -29,18 +35,29 @@ app.use((req, _res, next) => {
 
 app.use('/api/objects', objectsRouter);
 
-app.get('/', (_req, res) => {
-  res.json({ name: 'Sky2nite API', version: '1.0.0' });
-});
+if (process.env.NODE_ENV !== 'production') {
+  app.get('/', (_req, res) => {
+    res.json({ name: 'Sky2nite API', version: '1.0.0' });
+  });
+}
+
+if (process.env.NODE_ENV === 'production') {
+  const publicDir = path.join(__dirname, '..', 'public');
+  app.use(express.static(publicDir));
+  app.get('*', (_req, res) => {
+    res.sendFile(path.join(publicDir, 'index.html'));
+  });
+}
 
 app.use((err: Error, _req: express.Request, res: express.Response, _next: express.NextFunction) => {
   log.error('Unhandled error:', err.message);
   res.status(500).json({ err: err.message });
 });
 
-app.listen(PORT, () => {
+app.listen(PORT, async () => {
   log.info(`Sky2nite API running on port ${PORT}`);
   log.info(`ANTARES: ${process.env.ANTARES_API_BASE_URL || 'https://api.antares.noirlab.edu/v1'}`);
+  await initDb();
 });
 
 export default app;

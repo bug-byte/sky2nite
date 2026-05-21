@@ -1,20 +1,26 @@
-TODO's, UNORDERED**
+Ops
 
 - Unit & Integration Tests
 - Documentation
-- My Observations (likely requires postgres & redis)
-- Quick searches
-- Inline object viewer (from view details link)
-- Dockerization / dockerfile
-- Setup.sh script
 - Host on homelab
 - Create CI/CD pipeline to auto-deploy master branch to homelab when changes are made
-- Contain the object list within a smaller div and/or make it a table
-- Be able to filter the object list further after retrieval
-- Investigate why 500 records are always returned
-- Confirm antares caching implementation makes sense
-- Improve UI (make header banner sticky, put search filters panel on same line as location panel)
-- Include myself in the footer, add a "buy me a coffee" paypal link thing
-- Implement user accounts and authentication? Maybe overkill
+
+UI Things
+
 - Add filter for visibility window
 - Search by name?
+- Quick searches?
+- Include myself in the footer
+- Contain the object list within a smaller div and/or make it a table
+
+Major Features
+
+- Inline object viewer (from view details link)
+- My Observations page (likely requires postgres)
+- add a "buy me a coffee" paypal link thing
+- Implement user accounts and authentication? Maybe overkill
+
+Bugs / Investigation
+
+- Investigate why 500 records are always returned
+- Confirm antares caching implementation makes sense
