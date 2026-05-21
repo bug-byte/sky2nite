@@ -24,38 +24,93 @@ import type { SearchRequest } from './types/api'
 function App() {
   const [searchRequest, setSearchRequest] = useState<SearchRequest | null>(null)
   const [aboutOpen, setAboutOpen] = useState(false)
+  const [page, setPage] = useState(1)
+  const [pageSize, setPageSize] = useState(500)
+  // cursors[i] = ANTARES offset to use when requesting display page (i+1).
+  // cursors[0] = 0 always. Grows as the user advances forward.
+  const [cursors, setCursors] = useState<number[]>([0])
+  const [resetPagination, setResetPagination] = useState(false)
   const [filters, setFilters] = useState<Filters>({
     maxMagnitude: 14,
     objectTypes: [],
+    minAltitude: 15,
   })
   const { t, i18n } = useTranslation()
 
   const { data, isLoading, error } = useVisibleObjects(searchRequest, searchRequest !== null)
 
+  // When a page loads successfully, record its nextCursor so the next page is available.
+  const nextCursor = data?.pagination?.nextCursor ?? null
+  if (nextCursor !== null && cursors.length <= page) {
+    setCursors(prev => {
+      if (prev.length <= page) {
+        const updated = [...prev]
+        updated[page] = nextCursor
+        return updated
+      }
+      return prev
+    })
+  }
+
+  const buildRequest = (
+    base: SearchRequest,
+    targetPage: number,
+    cursorList: number[],
+    size: number,
+  ): SearchRequest => ({
+    ...base,
+    date: new Date().toISOString(),
+    pagination: { cursor: cursorList[targetPage - 1] ?? 0, pageSize: size },
+  })
+
   const handleLocationChange = (latitude: number, longitude: number) => {
+    const resetCursors = [0]
+    setCursors(resetCursors)
+    setPage(1)
+    setResetPagination(r => !r)
     setSearchRequest({
       latitude,
       longitude,
       date: new Date().toISOString(),
-      filters: {
-        maxMagnitude: filters.maxMagnitude,
-        objectTypes: filters.objectTypes,
-      },
+      filters: { maxMagnitude: filters.maxMagnitude, objectTypes: filters.objectTypes, minAltitude: filters.minAltitude },
+      pagination: { cursor: 0, pageSize },
     })
   }
 
   const handleFiltersChange = (newFilters: Filters) => {
     setFilters(newFilters)
-    // If we already have a location, trigger a new search with updated filters
     if (searchRequest) {
+      const resetCursors = [0]
+      setCursors(resetCursors)
+      setPage(1)
+      setResetPagination(r => !r)
       setSearchRequest({
         ...searchRequest,
-        filters: {
-          maxMagnitude: newFilters.maxMagnitude,
-          objectTypes: newFilters.objectTypes,
-        },
+        date: new Date().toISOString(),
+        filters: { maxMagnitude: newFilters.maxMagnitude, objectTypes: newFilters.objectTypes, minAltitude: newFilters.minAltitude },
+        pagination: { cursor: 0, pageSize },
       })
     }
+  }
+
+  const handlePageChange = (nextPage: number) => {
+    if (!searchRequest || nextPage < 1 || cursors[nextPage - 1] === undefined) return
+    setPage(nextPage)
+    setSearchRequest(buildRequest(searchRequest, nextPage, cursors, pageSize))
+  }
+
+  const handlePageSizeChange = (nextPageSize: number) => {
+    if (!searchRequest || nextPageSize < 1) return
+    const resetCursors = [0]
+    setCursors(resetCursors)
+    setPage(1)
+    setResetPagination(r => !r)
+    setPageSize(nextPageSize)
+    setSearchRequest({
+      ...searchRequest,
+      date: new Date().toISOString(),
+      pagination: { cursor: 0, pageSize: nextPageSize },
+    })
   }
 
   return (
@@ -109,7 +164,17 @@ function App() {
         <FilterControls filters={filters} onFiltersChange={handleFiltersChange} />
 
         {searchRequest && (
-          <ObjectsList objects={data?.objects || []} loading={isLoading} error={error} />
+          <ObjectsList
+            objects={data?.objects || []}
+            loading={isLoading}
+            error={error}
+            pagination={data?.pagination}
+            page={page}
+            onPageChange={handlePageChange}
+            pageSize={pageSize}
+            onPageSizeChange={handlePageSizeChange}
+            resetPagination={resetPagination}
+          />
         )}
       </Container>
 

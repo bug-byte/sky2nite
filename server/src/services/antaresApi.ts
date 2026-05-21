@@ -1,6 +1,12 @@
 import axios, { AxiosInstance } from 'axios';
 import type { AntaresLocus, AntaresListResponse, AntaresLocusListing, CacheEntry } from '../types/index.js';
 
+export interface LociAtOffsetResult {
+  loci: AntaresLocus[];
+  antaresTotalLoci: number;
+  hasNextPage: boolean;
+}
+
 export class AntaresApiClient {
   private client: AxiosInstance;
   private cache: Map<string, CacheEntry<any>>;
@@ -56,24 +62,50 @@ export class AntaresApiClient {
     };
   }
 
-  // List loci with optional filters (JSON:API REST format)
-  async listLoci(params: Record<string, string | number>): Promise<AntaresLocus[]> {
+  // List loci with optional filters (JSON:API REST format) — internal helper
+  private async listLoci(params: Record<string, string | number>): Promise<LociAtOffsetResult> {
     const cacheKey = this.getCacheKey('list', params);
-    const cached = this.getCached<AntaresLocus[]>(cacheKey);
+    const cached = this.getCached<LociAtOffsetResult>(cacheKey);
     if (cached) {
-      console.log('Returning cached list results');
+      console.log('Returning cached ANTARES loci batch', params);
       return cached;
     }
 
     try {
       const response = await this.client.get<AntaresListResponse>('/loci', { params });
       const loci = response.data.data.map(l => this.listingToLocus(l));
-      this.setCache(cacheKey, loci);
-      return loci;
+
+      const result: LociAtOffsetResult = {
+        loci,
+        antaresTotalLoci: response.data.meta.count,
+        hasNextPage: Boolean(response.data.links.next),
+      };
+
+      this.setCache(cacheKey, result);
+      return result;
     } catch (error) {
       console.error('ANTARES list error:', error);
       throw new Error(`Failed to search ANTARES: ${error instanceof Error ? error.message : 'Unknown error'}`);
     }
+  }
+
+  // Fetch one batch of raw (unfiltered) loci from a specific ANTARES offset.
+  // Magnitude and visibility filtering is left to the caller so cursor arithmetic
+  // maps 1-to-1 with ANTARES item indices.
+  async fetchLociAtOffset(
+    offset: number,
+    limit: number = 500,
+  ): Promise<LociAtOffsetResult> {
+    const safeOffset = Math.max(0, Math.floor(offset));
+    const safeLimit = Math.max(1, Math.min(500, Math.floor(limit)));
+
+    const params: Record<string, string | number> = {
+      'sort': 'properties.brightest_alert_magnitude',
+      'page[limit]': safeLimit,
+      'page[offset]': safeOffset,
+    };
+
+    return this.listLoci(params);
   }
 
   // Get available tags for filtering
@@ -101,27 +133,6 @@ export class AntaresApiClient {
         'young_extragalactic_candidate',
       ];
     }
-  }
-
-  // Search for bright objects suitable for amateur telescopes
-  async searchBrightObjects(maxMagnitude: number = 14, tags?: string[]): Promise<AntaresLocus[]> {
-    const params: Record<string, string | number> = {
-      'sort': 'properties.brightest_alert_magnitude',
-      'page[limit]': 500,
-    };
-
-    if (tags && tags.length > 0) {
-      // API supports one tag filter at a time; use the first selected tag
-      params['filter[tag]'] = tags[0];
-    }
-
-    const loci = await this.listLoci(params);
-
-    // Filter client-side by magnitude (API sorts but doesn't filter by value)
-    return loci.filter(l => {
-      const mag = l.properties.brightest_alert_magnitude ?? l.properties.newest_alert_magnitude;
-      return mag !== undefined && mag <= maxMagnitude;
-    });
   }
 
   // Clear the cache

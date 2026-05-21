@@ -18,6 +18,7 @@ import { useAvailableTags } from '../hooks/useVisibleObjects';
 export interface Filters {
   maxMagnitude: number;
   objectTypes: string[];
+  minAltitude: number;
 }
 
 interface FilterControlsProps {
@@ -36,6 +37,13 @@ export default function FilterControls({
     onFiltersChange({
       ...filters,
       maxMagnitude: newValue as number,
+    });
+  };
+
+  const handleMinAltitudeChange = (_event: Event, newValue: number | number[]) => {
+    onFiltersChange({
+      ...filters,
+      minAltitude: newValue as number,
     });
   };
 
@@ -92,6 +100,31 @@ export default function FilterControls({
         />
         <Typography variant="caption" color="text.secondary">
           {t('MESSAGE.MAGNITUDE_HELP')}
+        </Typography>
+      </Box>
+
+      <Box sx={{ mt: 3, mb: 4 }}>
+        <Typography gutterBottom>
+          {t('LABEL.MINIMUM_ALTITUDE')}: {filters.minAltitude}°
+        </Typography>
+        <Slider
+          value={filters.minAltitude}
+          onChange={handleMinAltitudeChange}
+          min={0}
+          max={60}
+          step={5}
+          marks={[
+            { value: 0, label: '0°' },
+            { value: 15, label: '15°' },
+            { value: 30, label: '30°' },
+            { value: 45, label: '45°' },
+            { value: 60, label: '60°' },
+          ]}
+          valueLabelDisplay="auto"
+          valueLabelFormat={(v) => `${v}°`}
+        />
+        <Typography variant="caption" color="text.secondary">
+          {t('MESSAGE.ALTITUDE_HELP')}
         </Typography>
       </Box>
 

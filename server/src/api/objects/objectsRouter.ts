@@ -9,17 +9,24 @@ const objectsRouter = Router();
 objectsRouter.post(
   '/tonight',
   responder(async (req) => {
-    const { latitude, longitude, date, filters = {} } = req.body as SearchRequest;
+    const { latitude, longitude, date, filters = {}, pagination = {} } = req.body as SearchRequest;
     const observationDate = date ? new Date(date) : new Date();
     if (isNaN(observationDate.getTime())) {
       throw new Error('Invalid date format.');
     }
+
+    const cursor = typeof pagination.cursor === 'number' ? pagination.cursor : 0;
+    const pageSize = typeof pagination.pageSize === 'number' ? pagination.pageSize : 500;
+
     return getTonightObjectsQuery(
       latitude,
       longitude,
       observationDate,
       filters.maxMagnitude ?? 14,
-      filters.objectTypes
+      filters.objectTypes,
+      cursor,
+      pageSize,
+      filters.minAltitude ?? 15,
     );
   })
 );

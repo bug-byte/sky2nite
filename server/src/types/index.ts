@@ -67,10 +67,17 @@ export interface LocationInput {
 export interface SearchFilters {
   maxMagnitude?: number;
   objectTypes?: string[];
+  minAltitude?: number;
+}
+
+export interface SearchPagination {
+  cursor?: number;   // ANTARES offset to start from (default 0)
+  pageSize?: number;
 }
 
 export interface SearchRequest extends LocationInput {
   filters?: SearchFilters;
+  pagination?: SearchPagination;
 }
 
 export interface VisibilityWindow {
@@ -92,6 +99,13 @@ export interface VisibleObject {
     lsst?: string;
   };
   antaresUrl: string;
+}
+
+export interface SearchResponsePagination {
+  pageSize: number;
+  hasNextPage: boolean;
+  nextCursor: number | null;  // ANTARES offset for the next page request (null = end of results)
+  antaresTotalLoci: number;
 }
 
 export interface CacheEntry<T> {

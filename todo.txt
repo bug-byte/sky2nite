@@ -16,6 +16,5 @@ TODO's, UNORDERED**
 - Improve UI (make header banner sticky, put search filters panel on same line as location panel)
 - Include myself in the footer, add a "buy me a coffee" paypal link thing
 - Implement user accounts and authentication? Maybe overkill
-- Confirm that filters are working (seems to be including items that werent selected)
 - Add filter for visibility window
 - Search by name?

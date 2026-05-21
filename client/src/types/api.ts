@@ -32,12 +32,19 @@ export interface SearchResponse {
   };
   objects: VisibleObject[];
   count: number;
+  pagination: {
+    pageSize: number;
+    hasNextPage: boolean;
+    nextCursor: number | null;
+    antaresTotalLoci: number;
+  };
 }
 
 // Request Types
 export interface SearchFilters {
   maxMagnitude?: number;
   objectTypes?: string[];
+  minAltitude?: number;
 }
 
 export interface SearchRequest {
@@ -45,6 +52,10 @@ export interface SearchRequest {
   longitude: number;
   date?: string;
   filters?: SearchFilters;
+  pagination?: {
+    cursor?: number;
+    pageSize?: number;
+  };
 }
 
 export interface TagsResponse {
