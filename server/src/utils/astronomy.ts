@@ -1,5 +1,12 @@
-import * as astro from 'astronomy-engine';
+import { createRequire } from 'module';
 import type { VisibilityWindow } from '../types/index.js';
+
+// astronomy-engine is a CJS package without "type":"module", so named ESM imports
+// fail under Node's static analysis. Load the CJS build directly via createRequire.
+const _require = createRequire(import.meta.url);
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const astro: any = _require('astronomy-engine');
+const { Observer, SearchRiseSet, Body, MakeTime, Horizon } = astro;
 
 // Calculate sunset and sunrise times for a given location and date
 export function calculateNightWindow(
@@ -7,11 +14,11 @@ export function calculateNightWindow(
   longitude: number,
   date: Date
 ): { sunset: Date; sunrise: Date } {
-  const observer = new astro.Observer(latitude, longitude, 0);
+  const observer = new Observer(latitude, longitude, 0);
 
   // Find sunset on the given date
-  const sunset = astro.SearchRiseSet(
-    astro.Body.Sun,
+  const sunset = SearchRiseSet(
+    Body.Sun,
     observer,
     -1, // -1 for set
     date,
@@ -23,8 +30,8 @@ export function calculateNightWindow(
   }
 
   // Find sunrise after sunset
-  const sunrise = astro.SearchRiseSet(
-    astro.Body.Sun,
+  const sunrise = SearchRiseSet(
+    Body.Sun,
     observer,
     +1, // +1 for rise
     sunset.date,
@@ -49,11 +56,11 @@ export function calculateAltAz(
   longitude: number,
   time: Date
 ): { altitude: number; azimuth: number } {
-  const observer = new astro.Observer(latitude, longitude, 0);
-  const astroTime = astro.MakeTime(time);
+  const observer = new Observer(latitude, longitude, 0);
+  const astroTime = MakeTime(time);
 
   // Convert to horizontal coordinates
-  const horizontal = astro.Horizon(astroTime, observer, ra / 15, dec, 'normal');
+  const horizontal = Horizon(astroTime, observer, ra / 15, dec, 'normal');
 
   return {
     altitude: horizontal.altitude,
