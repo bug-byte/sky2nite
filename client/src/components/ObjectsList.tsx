@@ -1,5 +1,5 @@
 import DataTable, { createTheme, type TableColumn } from 'react-data-table-component';
-import { Box, Typography, CircularProgress, Alert, Link, Stack, Chip } from '@mui/material';
+import { Box, Typography, CircularProgress, Alert, Link, Stack, Chip, Tooltip } from '@mui/material';
 import { StarsOutlined as StarsOutlinedIcon } from '@mui/icons-material';
 import { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -113,7 +113,8 @@ export default function ObjectsList({
           </Typography>
         </Box>
       ),
-      minWidth: '180px',
+      minWidth: '200px',
+      grow: 0,
     },
     {
       id: 'maxAltitude',
@@ -121,7 +122,7 @@ export default function ObjectsList({
       selector: row => row.maxAltitude,
       sortable: true,
       right: true,
-      width: '110px',
+      width: '130px',
       format: row => `${row.maxAltitude.toFixed(1)}°`,
     },
     {
@@ -133,11 +134,23 @@ export default function ObjectsList({
             <Chip key={tag} label={tag.replace(/_/g, ' ')} size="small" />
           ))}
           {row.tags.length > 3 && (
-            <Chip
-              label={t('MESSAGE.MORE_TAGS', { count: row.tags.length - 3 })}
-              size="small"
-              variant="outlined"
-            />
+            <Tooltip
+              title={
+                <Stack direction="row" spacing={0.5} useFlexGap flexWrap="wrap" sx={{ p: 0.5 }}>
+                  {row.tags.slice(3).map(tag => (
+                    <Chip key={tag} label={tag.replace(/_/g, ' ')} size="small" />
+                  ))}
+                </Stack>
+              }
+              arrow
+            >
+              <Chip
+                label={t('MESSAGE.MORE_TAGS', { count: row.tags.length - 3 })}
+                size="small"
+                variant="outlined"
+                sx={{ cursor: 'default' }}
+              />
+            </Tooltip>
           )}
         </Stack>
       ),

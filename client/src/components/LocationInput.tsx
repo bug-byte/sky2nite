@@ -15,6 +15,7 @@ import { LocationOnOutlined as LocationOnOutlinedIcon, MyLocation as MyLocationI
 interface LocationInputProps {
   onLocationChange: (latitude: number, longitude: number) => void;
   onLoadingChange?: (loading: boolean) => void;
+  locationRequired?: boolean;
 }
 
 export interface LocationInputHandle {
@@ -26,7 +27,7 @@ export interface LocationInputHandle {
 const GOOGLE_API_KEY = import.meta.env.VITE_GOOGLE_MAPS_API_KEY || '';
 
 const LocationInput = forwardRef<LocationInputHandle, LocationInputProps>(function LocationInput(
-  { onLocationChange, onLoadingChange },
+  { onLocationChange, onLoadingChange, locationRequired = true },
   ref
 ) {
   const [latitude, setLatitude] = useState<string>('');
@@ -121,12 +122,12 @@ const LocationInput = forwardRef<LocationInputHandle, LocationInputProps>(functi
     const lon = parseFloat(longitude);
 
     if (isNaN(lat) || lat < -90 || lat > 90) {
-      setError(t('ERROR.INVALID_LATITUDE'));
+      if (locationRequired) setError(t('ERROR.INVALID_LATITUDE'));
       return;
     }
 
     if (isNaN(lon) || lon < -180 || lon > 180) {
-      setError(t('ERROR.INVALID_LONGITUDE'));
+      if (locationRequired) setError(t('ERROR.INVALID_LONGITUDE'));
       return;
     }
 

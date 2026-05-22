@@ -1,4 +1,4 @@
-import { useState, useRef } from 'react'
+import { useState, useRef, useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
 import {
   AppBar,
@@ -20,6 +20,7 @@ import {
   MenuItem,
   OutlinedInput,
   Chip,
+  TextField,
 } from '@mui/material'
 import type { SelectChangeEvent } from '@mui/material'
 import { TravelExplore as TravelExploreIcon, InfoOutlined as InfoOutlinedIcon, FilterAltOutlined as FilterAltOutlinedIcon, Search as SearchIcon } from '@mui/icons-material'
@@ -43,12 +44,49 @@ function App() {
     objectTypes: [],
     minAltitude: 15,
   })
+  const [locusIdFilter, setLocusIdFilter] = useState('')
+  const [visibilityStart, setVisibilityStart] = useState('')
+  const [visibilityEnd, setVisibilityEnd] = useState('')
   const locationRef = useRef<LocationInputHandle>(null)
   const [locationLoading, setLocationLoading] = useState(false)
   const { t, i18n } = useTranslation()
 
   const { data, isLoading, error } = useVisibleObjects(searchRequest, searchRequest !== null)
   const { data: availableTags = [] } = useAvailableTags()
+
+  const filteredObjects = useMemo(() => {
+    let objs = data?.objects ?? []
+
+    if (locusIdFilter.trim()) {
+      const q = locusIdFilter.trim().toLowerCase()
+      objs = objs.filter(o => o.locusId.toLowerCase().includes(q))
+    }
+
+    if (visibilityStart || visibilityEnd) {
+      // Map HH:MM to minutes; treat 00-11 as post-midnight (+24h) for overnight spans
+      const toMins = (hhmm: string) => {
+        const [h, m] = hhmm.split(':').map(Number)
+        return (h < 12 ? h + 24 : h) * 60 + m
+      }
+      const isoToMins = (iso: string) => {
+        const d = new Date(iso)
+        const h = d.getHours()
+        return (h < 12 ? h + 24 : h) * 60 + d.getMinutes()
+      }
+      const filterStart = visibilityStart ? toMins(visibilityStart) : null
+      const filterEnd = visibilityEnd ? toMins(visibilityEnd) : null
+
+      objs = objs.filter(o => {
+        const winStart = isoToMins(o.visibilityWindow.start)
+        const winEnd = isoToMins(o.visibilityWindow.end)
+        if (filterEnd !== null && winStart > filterEnd) return false
+        if (filterStart !== null && winEnd < filterStart) return false
+        return true
+      })
+    }
+
+    return objs
+  }, [data?.objects, locusIdFilter, visibilityStart, visibilityEnd])
 
   // When a page loads successfully, record its nextCursor so the next page is available.
   const nextCursor = data?.pagination?.nextCursor ?? null
@@ -182,6 +220,7 @@ function App() {
               ref={locationRef}
               onLocationChange={handleLocationChange}
               onLoadingChange={setLocationLoading}
+              locationRequired={!locusIdFilter.trim()}
             />
           </Box>
           <Box sx={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column' }}>
@@ -229,6 +268,45 @@ function App() {
                   {t('LABEL.OBJECT_TYPES_HELP')}
                 </Typography>
               </FormControl>
+              <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5, mt: 2 }}>
+                <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.5 }}>
+                  <Box sx={{ display: 'flex', gap: 1 }}>
+                    <Box sx={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 0.5 }}>
+                      <Typography variant="caption" color="text.secondary">{t('LABEL.VISIBILITY_FROM')}</Typography>
+                      <TextField
+                        type="time"
+                        value={visibilityStart}
+                        onChange={(e) => setVisibilityStart(e.target.value)}
+                        size="small"
+                        fullWidth
+                      />
+                    </Box>
+                    <Box sx={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 0.5 }}>
+                      <Typography variant="caption" color="text.secondary">{t('LABEL.VISIBILITY_TO')}</Typography>
+                      <TextField
+                        type="time"
+                        value={visibilityEnd}
+                        onChange={(e) => setVisibilityEnd(e.target.value)}
+                        size="small"
+                        fullWidth
+                      />
+                    </Box>
+                  </Box>
+                </Box>
+                <TextField
+                  label={t('LABEL.LOCUS_ID_SEARCH')}
+                  placeholder={t('LABEL.LOCUS_ID_SEARCH_PLACEHOLDER')}
+                  value={locusIdFilter}
+                  onChange={(e) => setLocusIdFilter(e.target.value)}
+                  size="small"
+                  fullWidth
+                />
+                {locusIdFilter.trim() && !searchRequest && (
+                  <Typography variant="caption" color="text.secondary" sx={{ mt: 0.5 }}>
+                    {t('MESSAGE.NAME_FILTER_NEEDS_LOCATION')}
+                  </Typography>
+                )}
+              </Box>
             </Paper>
           </Box>
         </Box>
@@ -246,9 +324,9 @@ function App() {
           </Button>
         </Box>
 
-        {searchRequest && (
+        {searchRequest !== null && (
           <ObjectsList
-            objects={data?.objects || []}
+            objects={filteredObjects}
             loading={isLoading}
             error={error}
             pagination={data?.pagination}
@@ -282,6 +360,7 @@ function App() {
             <Link href="https://rubinobservatory.org/" target="_blank" rel="noopener">
               Vera C. Rubin Observatory
             </Link>
+            {' — '}{t('MESSAGE.WRITTEN_BY')}
           </Typography>
         </Container>
       </Box>

@@ -7,18 +7,15 @@ Ops
 
 UI Things
 
-- Add filter for visibility window
-- Search by name?
-- Quick searches?
-- Include myself in the footer
-- Contain the object list within a smaller div and/or make it a table
+- Contain the object list within a smaller div
 
 Major Features
 
+- Future alerts / notifications
 - Inline object viewer (from view details link)
-- My Observations page (likely requires postgres)
 - add a "buy me a coffee" paypal link thing
-- Implement user accounts and authentication? Maybe overkill
+- My Observations page (requires postgres)
+- Implement basic authentication and login form and first-time-setup (requires postgres)
 
 Bugs / Investigation
 
