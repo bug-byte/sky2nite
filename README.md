@@ -28,6 +28,8 @@ Key variables:
 |---|---|
 | `PORT` | Port the server listens on (default `3000`) |
 | `DATABASE_URL` | PostgreSQL connection string |
+| `JWT_SECRET` | Secret used to sign auth tokens (required) |
+| `AUTH_TOKEN_TTL` | Login token lifetime (default `7d`) |
 | `ANTARES_API_BASE_URL` | ANTARES broker API base URL |
 | `CACHE_TTL_SECONDS` | How long to cache ANTARES responses |
 | `VITE_GOOGLE_MAPS_API_KEY` | *(Optional)* Google Maps API key for address autocomplete |
@@ -56,6 +58,8 @@ docker compose --env-file server/.env up --build
 The `--env-file server/.env` flag makes your `VITE_GOOGLE_MAPS_API_KEY` (and any other `VITE_*` vars) available to the build step so Vite can bake them into the client bundle.
 
 The app is available at **http://localhost:3000**.
+
+On first launch, Sky2nite shows a **first-time setup** form to create the initial user account in PostgreSQL. After setup, users authenticate with the login form before accessing object search endpoints.
 
 To run in the background:
 
@@ -109,6 +113,8 @@ cd server && NODE_ENV=production node dist/index.js
 
 The app is available at **http://localhost:3000**.
 
+On first launch, Sky2nite shows a **first-time setup** form to create the initial user account in PostgreSQL. After setup, users authenticate with the login form before accessing object search endpoints.
+
 ---
 
 ## Setup — Windows (host)
@@ -145,6 +151,8 @@ cd server; $env:NODE_ENV = 'production'; node dist/index.js
 
 The app is available at **http://localhost:3000**.
 
+On first launch, Sky2nite shows a **first-time setup** form to create the initial user account in PostgreSQL. After setup, users authenticate with the login form before accessing object search endpoints.
+
 ---
 
 ## Development
@@ -160,6 +168,16 @@ cd client && npm run dev
 ```
 
 The Vite dev server proxies API requests to the Express server automatically.
+
+### Database initialization scripts
+
+Server startup automatically runs SQL initialization scripts from [server/src/data/scripts](server/src/data/scripts) if they have not been executed before.
+
+Script rules:
+- Name scripts as `NNN.description.sql` (for example `002.add_feature.sql`)
+- Scripts are executed in lexical order
+- Applied scripts are tracked in `sys.executed_scripts`
+- Already-applied scripts are skipped on subsequent startups
 
 ---
 

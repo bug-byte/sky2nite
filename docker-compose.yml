@@ -26,6 +26,8 @@ services:
     environment:
       NODE_ENV: production
       PORT: 3000
+      JWT_SECRET: ${JWT_SECRET:-change_me_in_production}
+      AUTH_TOKEN_TTL: ${AUTH_TOKEN_TTL:-7d}
       # PostgreSQL — change credentials/host if using your own existing instance
       DATABASE_URL: postgresql://sky2nite:sky2nite@db:5432/sky2nite
       # ANTARES API

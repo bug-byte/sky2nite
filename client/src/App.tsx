@@ -1,4 +1,4 @@
-import { useState, useRef, useMemo } from 'react'
+import { useState, useRef, useMemo, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
 import {
   AppBar,
@@ -27,8 +27,10 @@ import { TravelExplore as TravelExploreIcon, InfoOutlined as InfoOutlinedIcon, F
 import LocationInput, { type LocationInputHandle } from './components/LocationInput'
 import FilterControls, { type Filters } from './components/FilterControls'
 import ObjectsList from './components/ObjectsList'
+import AuthCard from './components/AuthCard'
 import { useVisibleObjects, useAvailableTags } from './hooks/useVisibleObjects'
 import type { SearchRequest } from './types/api'
+import { api, type AuthUser } from './services/api'
 
 function App() {
   const [searchRequest, setSearchRequest] = useState<SearchRequest | null>(null)
@@ -49,10 +51,80 @@ function App() {
   const [visibilityEnd, setVisibilityEnd] = useState('')
   const locationRef = useRef<LocationInputHandle>(null)
   const [locationLoading, setLocationLoading] = useState(false)
+  const [authMode, setAuthMode] = useState<'setup' | 'login'>('login')
+  const [authLoading, setAuthLoading] = useState(true)
+  const [authError, setAuthError] = useState<string | null>(null)
+  const [authUser, setAuthUser] = useState<AuthUser | null>(null)
   const { t, i18n } = useTranslation()
 
   const { data, isLoading, error } = useVisibleObjects(searchRequest, searchRequest !== null)
-  const { data: availableTags = [] } = useAvailableTags()
+  const { data: availableTags = [] } = useAvailableTags(Boolean(authUser))
+
+  useEffect(() => {
+    let cancelled = false
+
+    const bootstrapAuth = async () => {
+      setAuthLoading(true)
+      setAuthError(null)
+
+      try {
+        const status = await api.getSetupStatus()
+        if (cancelled) return
+
+        const nextMode = status.isSetupComplete ? 'login' : 'setup'
+        setAuthMode(nextMode)
+
+        const token = api.getStoredAuthToken()
+        if (status.isSetupComplete && token) {
+          try {
+            const user = await api.getCurrentUser()
+            if (cancelled) return
+            setAuthUser(user)
+          } catch {
+            api.clearAuthToken()
+          }
+        }
+      } catch (e) {
+        if (!cancelled) {
+          setAuthError(e instanceof Error ? e.message : 'Failed to initialize authentication state.')
+        }
+      } finally {
+        if (!cancelled) {
+          setAuthLoading(false)
+        }
+      }
+    }
+
+    void bootstrapAuth()
+
+    return () => {
+      cancelled = true
+    }
+  }, [])
+
+  const handleAuthenticate = async (username: string, password: string) => {
+    setAuthLoading(true)
+    setAuthError(null)
+
+    try {
+      const user = authMode === 'setup'
+        ? await api.setupFirstUser(username, password)
+        : await api.login(username, password)
+      setAuthUser(user)
+    } catch (e) {
+      setAuthError(e instanceof Error ? e.message : 'Authentication failed.')
+    } finally {
+      setAuthLoading(false)
+    }
+  }
+
+  const handleLogout = () => {
+    api.clearAuthToken()
+    setAuthUser(null)
+    setSearchRequest(null)
+    setPage(1)
+    setCursors([0])
+  }
 
   const filteredObjects = useMemo(() => {
     let objs = data?.objects ?? []
@@ -167,6 +239,17 @@ function App() {
     })
   }
 
+  if (!authUser) {
+    return (
+      <AuthCard
+        mode={authMode}
+        loading={authLoading}
+        error={authError}
+        onSubmit={handleAuthenticate}
+      />
+    )
+  }
+
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
       <AppBar 
@@ -206,6 +289,9 @@ function App() {
           <IconButton color="inherit" onClick={() => setAboutOpen(true)} aria-label={t('COMMAND.ABOUT')}>
             <InfoOutlinedIcon />
           </IconButton>
+          <Button color="inherit" onClick={handleLogout} sx={{ ml: 1 }}>
+            {authUser.username} · Logout
+          </Button>
         </Toolbar>
       </AppBar>
 

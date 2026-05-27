@@ -20,10 +20,11 @@ export const useVisibleObjects = (
   });
 };
 
-export const useAvailableTags = () => {
+export const useAvailableTags = (enabled: boolean = true) => {
   return useQuery<string[], Error>({
     queryKey: ['available-tags'],
     queryFn: () => api.getAvailableTags(),
+    enabled,
     staleTime: 24 * 60 * 60 * 1000, // 24 hours
     retry: 2,
   });

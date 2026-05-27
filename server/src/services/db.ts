@@ -1,8 +1,13 @@
+import '../config/loadEnv.js';
 import pg from 'pg';
 import getLogger from '../util/getLogger.js';
 
 const { Pool } = pg;
 const log = getLogger('DB');
+
+if (!process.env.DATABASE_URL) {
+  throw new Error('DATABASE_URL is required to start the server.');
+}
 
 const pool = new Pool({
   connectionString: process.env.DATABASE_URL,
@@ -15,11 +20,7 @@ pool.on('error', (err) => {
   log.error('Unexpected PostgreSQL client error:', err.message);
 });
 
-/**
- * Verifies the database connection on startup.
- * Logs a warning but does not crash the server if the database is unavailable,
- * so existing non-database functionality continues to work.
- */
+// Verifies that PostgreSQL is reachable before the app starts accepting requests.
 export async function initDb(): Promise<void> {
   try {
     const client = await pool.connect();
@@ -27,9 +28,9 @@ export async function initDb(): Promise<void> {
     client.release();
     log.info('PostgreSQL connection established.');
   } catch (err: any) {
-    log.warn('Could not connect to PostgreSQL:', err.message);
-    log.warn('Set DATABASE_URL in server/.env and ensure PostgreSQL is running.');
-    log.warn('Some features will be unavailable until a connection is established.');
+    log.error('Could not connect to PostgreSQL:', err.message);
+    log.error('Set DATABASE_URL in server/.env and ensure PostgreSQL is running.');
+    throw err;
   }
 }
 
