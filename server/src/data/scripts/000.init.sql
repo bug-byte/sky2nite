@@ -1,0 +1,6 @@
+CREATE SCHEMA IF NOT EXISTS sys;
+
+CREATE TABLE IF NOT EXISTS sys.executed_scripts (
+  script_name TEXT PRIMARY KEY,
+  executed_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
