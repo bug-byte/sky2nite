@@ -4,7 +4,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { ThemeProvider, createTheme, CssBaseline } from '@mui/material'
 import './index.css'
 import './i18n'
-import App from './App.tsx'
+import App from './ui/shell/App'
 
 // Create React Query client
 const queryClient = new QueryClient({

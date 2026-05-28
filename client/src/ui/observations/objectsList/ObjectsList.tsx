@@ -23,8 +23,8 @@ import {
 } from "@mui/icons-material";
 import { useMemo } from "react";
 import { useTranslation } from "react-i18next";
-import type { VisibleObject } from "../types/api";
-import SkyPreview from "./SkyPreview";
+import type { VisibleObject } from '../../../types/api';
+import SkyPreview from './skyPreview/SkyPreview';
 
 // Dark glass theme matching the app's visual style
 createTheme(

@@ -13,8 +13,8 @@ import {
 } from '@mui/material'
 import { ManageAccounts as ManageAccountsIcon, Lock as LockIcon } from '@mui/icons-material'
 import { useTranslation } from 'react-i18next'
-import { api } from '../services/api'
-import type { AuthUser } from '../services/api'
+import { api } from '../../services/api'
+import type { AuthUser } from '../../services/api'
 
 interface SettingsPageProps {
   authUser: AuthUser
