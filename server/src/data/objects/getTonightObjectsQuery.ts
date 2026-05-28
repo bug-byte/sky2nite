@@ -1,7 +1,7 @@
 import { antaresApi } from '../../services/antaresApi.js';
-import { calculateNightWindow, calculateVisibility } from '../../utils/astronomy.js';
+import { calculateNightWindow, calculateVisibility } from '../../util/astronomy.js';
 import getLogger from '../../util/getLogger.js';
-import type { SearchResponsePagination, VisibleObject } from '../../types/index.js';
+import type { SearchRequest, SearchResponsePagination, VisibleObject } from '../../types/index.js';
 
 const log = getLogger('getTonightObjectsQuery');
 
@@ -16,16 +16,9 @@ export interface TonightResult {
   pagination: SearchResponsePagination;
 }
 
-export async function getTonightObjectsQuery(
-  latitude: number,
-  longitude: number,
-  date: Date,
-  maxMagnitude: number,
-  tags?: string[],
-  cursor: number = 0,
-  pageSize: number = 500,
-  minAltitude: number = 15,
-): Promise<TonightResult> {
+export async function getTonightObjectsQuery(request: SearchRequest): Promise<TonightResult> {
+  const { latitude, longitude, filters = {}, pagination = {} } = request;
+
   if (typeof latitude !== 'number' || latitude < -90 || latitude > 90) {
     throw new Error('Invalid latitude. Must be between -90 and 90.');
   }
@@ -33,12 +26,20 @@ export async function getTonightObjectsQuery(
     throw new Error('Invalid longitude. Must be between -180 and 180.');
   }
 
-  const safePageSize = Math.max(1, Math.min(500, Math.floor(pageSize)));
-  const safeCursor = Math.max(0, Math.floor(cursor));
+  const observationDate = request.date ? new Date(request.date) : new Date();
+  if (isNaN(observationDate.getTime())) {
+    throw new Error('Invalid date format.');
+  }
 
-  log.info(`Searching for objects visible from (${latitude}, ${longitude}) on ${date.toISOString()}`);
+  const maxMagnitude = filters.maxMagnitude ?? 14;
+  const tags = filters.objectTypes;
+  const minAltitude = filters.minAltitude ?? 15;
+  const safePageSize = Math.max(1, Math.min(500, Math.floor(typeof pagination.pageSize === 'number' ? pagination.pageSize : 500)));
+  const safeCursor = Math.max(0, Math.floor(typeof pagination.cursor === 'number' ? pagination.cursor : 0));
 
-  const { sunset, sunrise } = calculateNightWindow(latitude, longitude, date);
+  log.info(`Searching for objects visible from (${latitude}, ${longitude}) on ${observationDate.toISOString()}`);
+
+  const { sunset, sunrise } = calculateNightWindow(latitude, longitude, observationDate);
   log.info(`Night window: ${sunset.toISOString()} to ${sunrise.toISOString()}`);
 
   log.info(`Querying ANTARES for objects with magnitude <= ${maxMagnitude}, starting at cursor ${safeCursor}`);
@@ -118,7 +119,7 @@ export async function getTonightObjectsQuery(
 
   return {
     location: { latitude, longitude },
-    date: date.toISOString(),
+    date: observationDate.toISOString(),
     nightWindow: {
       sunset: sunset.toISOString(),
       sunrise: sunrise.toISOString(),

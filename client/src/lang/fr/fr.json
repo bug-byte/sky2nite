@@ -40,6 +40,7 @@
     "LONGITUDE": "Longitude",
     "LONGITUDE_HELP": "Entre -180 et 180",
     "LONGITUDE_PLACEHOLDER": "ex. -73.5673",
+    "SKY": "Ciel",
     "LOCUS_ID": "ID Locus",
     "MAGNITUDE": "Magnitude",
     "MAX_ALTITUDE": "Altitude max.",

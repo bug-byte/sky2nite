@@ -95,7 +95,7 @@ export default function ObjectsList({
     () => [
       {
         id: "skyPreview",
-        name: "Sky",
+        name: <span style={{ paddingLeft: '8px' }}>{t('LABEL.SKY')}</span>,
         cell: (row) => (
           <SkyPreview ra={row.ra} dec={row.dec} antaresUrl={row.antaresUrl} />
         ),
@@ -183,7 +183,7 @@ export default function ObjectsList({
             </Typography>
           </Box>
         ),
-        minWidth: "200px",
+        minWidth: "230px",
         grow: 0,
       },
       {

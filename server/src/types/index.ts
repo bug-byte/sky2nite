@@ -113,3 +113,8 @@ export interface CacheEntry<T> {
   timestamp: number;
   ttl: number;
 }
+
+export interface AuthUser {
+  id: number;
+  username: string;
+}

@@ -1,27 +1,49 @@
-import axios, { AxiosInstance } from 'axios';
 import type { AntaresLocus, AntaresListResponse, AntaresLocusListing, CacheEntry } from '../types/index.js';
 
-export interface LociAtOffsetResult {
+interface LociAtOffsetResult {
   loci: AntaresLocus[];
   antaresTotalLoci: number;
   hasNextPage: boolean;
 }
 
 export class AntaresApiClient {
-  private client: AxiosInstance;
+  private baseURL: string;
+  private timeout: number;
   private cache: Map<string, CacheEntry<any>>;
   private cacheTTL: number;
 
   constructor(baseURL: string, cacheTTL: number = 3600) {
-    this.client = axios.create({
-      baseURL,
-      timeout: 30000,
-      headers: {
-        'Accept': 'application/json',
-      },
-    });
+    this.baseURL = baseURL.replace(/\/$/, '');
+    this.timeout = 30000;
     this.cache = new Map();
     this.cacheTTL = cacheTTL * 1000;
+  }
+
+  private async get<T>(path: string, params?: Record<string, string | number>): Promise<T> {
+    const url = new URL(`${this.baseURL}${path}`);
+    if (params) {
+      for (const [key, value] of Object.entries(params)) {
+        url.searchParams.set(key, String(value));
+      }
+    }
+
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), this.timeout);
+
+    try {
+      const response = await fetch(url.toString(), {
+        headers: { Accept: 'application/json' },
+        signal: controller.signal,
+      });
+
+      if (!response.ok) {
+        throw new Error(`ANTARES API responded with ${response.status} ${response.statusText}`);
+      }
+
+      return response.json() as Promise<T>;
+    } finally {
+      clearTimeout(timeoutId);
+    }
   }
 
   private getCacheKey(method: string, ...args: any[]): string {
@@ -72,13 +94,13 @@ export class AntaresApiClient {
     }
 
     try {
-      const response = await this.client.get<AntaresListResponse>('/loci', { params });
-      const loci = response.data.data.map(l => this.listingToLocus(l));
+      const data = await this.get<AntaresListResponse>('/loci', params);
+      const loci = data.data.map(l => this.listingToLocus(l));
 
       const result: LociAtOffsetResult = {
         loci,
-        antaresTotalLoci: response.data.meta.count,
-        hasNextPage: Boolean(response.data.links.next),
+        antaresTotalLoci: data.meta.count,
+        hasNextPage: Boolean(data.links.next),
       };
 
       this.setCache(cacheKey, result);
@@ -117,10 +139,8 @@ export class AntaresApiClient {
     }
 
     try {
-      const response = await this.client.get<{ data: Array<{ id: string }> }>('/tags', {
-        params: { 'page[limit]': 100 },
-      });
-      const tags = response.data.data.map(t => t.id);
+      const data = await this.get<{ data: Array<{ id: string }> }>('/tags', { 'page[limit]': 100 });
+      const tags = data.data.map(t => t.id);
       this.setCache(cacheKey, tags, 86400000); // Cache for 24 hours
       return tags;
     } catch (error) {
