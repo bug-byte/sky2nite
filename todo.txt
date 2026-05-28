@@ -5,17 +5,11 @@ Ops
 - Host on homelab
 - Create CI/CD pipeline to auto-deploy master branch to homelab when changes are made
 
-UI Things
-
-- Contain the object list within a smaller div
-
 Major Features
 
 - Future alerts / notifications
-- Inline object viewer (from view details link)
-- add a "buy me a coffee" paypal link thing
 - My Observations page (requires postgres)
-- Implement basic authentication and login form and first-time-setup (requires postgres)
+- add a "buy me a coffee" paypal link thing
 
 Bugs / Investigation
 

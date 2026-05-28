@@ -21,9 +21,10 @@ import {
   OutlinedInput,
   Chip,
   TextField,
+  Tooltip,
 } from '@mui/material'
 import type { SelectChangeEvent } from '@mui/material'
-import { TravelExplore as TravelExploreIcon, InfoOutlined as InfoOutlinedIcon, FilterAltOutlined as FilterAltOutlinedIcon, Search as SearchIcon } from '@mui/icons-material'
+import { TravelExplore as TravelExploreIcon, InfoOutlined as InfoOutlinedIcon, FilterAltOutlined as FilterAltOutlinedIcon, Search as SearchIcon, Logout as LogoutIcon } from '@mui/icons-material'
 import LocationInput, { type LocationInputHandle } from './components/LocationInput'
 import FilterControls, { type Filters } from './components/FilterControls'
 import ObjectsList from './components/ObjectsList'
@@ -110,6 +111,7 @@ function App() {
       const user = authMode === 'setup'
         ? await api.setupFirstUser(username, password)
         : await api.login(username, password)
+      setAuthMode('login')
       setAuthUser(user)
     } catch (e) {
       setAuthError(e instanceof Error ? e.message : 'Authentication failed.')
@@ -252,8 +254,8 @@ function App() {
 
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
-      <AppBar 
-        position="sticky" 
+      <AppBar
+        position="sticky"
         elevation={0}
         sx={{
           background: 'rgba(15, 23, 41, 0.6)',
@@ -261,18 +263,35 @@ function App() {
           borderBottom: '1px solid rgba(255, 255, 255, 0.1)',
         }}
       >
-        <Toolbar>
-          <Typography variant="h5" component="div" sx={{ flexGrow: 1, fontWeight: 600, display: 'flex', alignItems: 'center', gap: 1 }}>
-            <TravelExploreIcon />
-            {t('LABEL.APP_TITLE')} - {t('LABEL.APP_SUBTITLE')}
-          </Typography>
-          <Box sx={{ display: 'flex', gap: 0.5, mr: 1 }}>
+        <Toolbar sx={{ px: { xs: 1, sm: 2 }, gap: { xs: 0.5, sm: 1 } }}>
+          {/* Logo + title */}
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.75, flexGrow: 1, minWidth: 0 }}>
+            <TravelExploreIcon sx={{ fontSize: { xs: '1.25rem', sm: '1.5rem' }, flexShrink: 0 }} />
+            <Typography
+              component="div"
+              sx={{
+                fontWeight: 600,
+                fontSize: { xs: '1rem', sm: '1.25rem' },
+                whiteSpace: 'nowrap',
+                overflow: 'hidden',
+                textOverflow: 'ellipsis',
+              }}
+            >
+              {t('LABEL.APP_TITLE')}
+              <Box component="span" sx={{ display: { xs: 'none', sm: 'inline' } }}>
+                {' '}&mdash;{' '}{t('LABEL.APP_SUBTITLE')}
+              </Box>
+            </Typography>
+          </Box>
+
+          {/* Language toggle */}
+          <Box sx={{ display: 'flex', gap: 0.5, flexShrink: 0 }}>
             <Button
               size="small"
               onClick={() => void i18n.changeLanguage('en')}
               color="inherit"
               variant={i18n.language === 'en' ? 'outlined' : 'text'}
-              sx={{ minWidth: 0, px: 1.5, py: 0.5, fontSize: '0.75rem' }}
+              sx={{ minWidth: 0, px: { xs: 1, sm: 1.5 }, py: 0.5, fontSize: '0.75rem' }}
             >
               EN
             </Button>
@@ -281,16 +300,39 @@ function App() {
               onClick={() => void i18n.changeLanguage('fr')}
               color="inherit"
               variant={i18n.language === 'fr' ? 'outlined' : 'text'}
-              sx={{ minWidth: 0, px: 1.5, py: 0.5, fontSize: '0.75rem' }}
+              sx={{ minWidth: 0, px: { xs: 1, sm: 1.5 }, py: 0.5, fontSize: '0.75rem' }}
             >
               FR
             </Button>
           </Box>
-          <IconButton color="inherit" onClick={() => setAboutOpen(true)} aria-label={t('COMMAND.ABOUT')}>
-            <InfoOutlinedIcon />
-          </IconButton>
-          <Button color="inherit" onClick={handleLogout} sx={{ ml: 1 }}>
-            {authUser.username} · Logout
+
+          {/* About */}
+          <Tooltip title={t('COMMAND.ABOUT')}>
+            <IconButton color="inherit" onClick={() => setAboutOpen(true)} aria-label={t('COMMAND.ABOUT')} size="small">
+              <InfoOutlinedIcon fontSize="small" />
+            </IconButton>
+          </Tooltip>
+
+          {/* Logout — icon-only on xs, full button on sm+ */}
+          <Tooltip title={`${authUser.username} — Logout`}>
+            <IconButton
+              color="inherit"
+              onClick={handleLogout}
+              aria-label="Logout"
+              size="small"
+              sx={{ display: { xs: 'inline-flex', sm: 'none' } }}
+            >
+              <LogoutIcon fontSize="small" />
+            </IconButton>
+          </Tooltip>
+          <Button
+            color="inherit"
+            onClick={handleLogout}
+            size="small"
+            startIcon={<LogoutIcon fontSize="small" />}
+            sx={{ display: { xs: 'none', sm: 'inline-flex' }, ml: 0.5, fontSize: '0.8rem', textTransform: 'none', whiteSpace: 'nowrap' }}
+          >
+            {authUser.username}
           </Button>
         </Toolbar>
       </AppBar>

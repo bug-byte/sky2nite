@@ -4,6 +4,7 @@ import { StarsOutlined as StarsOutlinedIcon } from '@mui/icons-material';
 import { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import type { VisibleObject } from '../types/api';
+import SkyPreview from './SkyPreview';
 
 // Dark glass theme matching the app's visual style
 createTheme(
@@ -61,6 +62,13 @@ export default function ObjectsList({
   };
 
   const columns = useMemo<TableColumn<VisibleObject>[]>(() => [
+    {
+      id: 'skyPreview',
+      name: 'Sky',
+      cell: row => <SkyPreview ra={row.ra} dec={row.dec} antaresUrl={row.antaresUrl} />,
+      width: '116px',
+      compact: true,
+    },
     {
       id: 'locusId',
       name: t('LABEL.LOCUS_ID'),
@@ -191,37 +199,37 @@ export default function ObjectsList({
   }
 
   return (
-    <Box sx={{ mt: 2 }}>
-      <Box sx={{ display: 'flex', alignItems: 'center', mb: 1.5 }}>
+    <Box
+      sx={{
+        mt: 2,
+        background: 'rgba(15, 23, 41, 0.4)',
+        backdropFilter: 'blur(12px)',
+        border: '1px solid rgba(255, 255, 255, 0.15)',
+        borderRadius: '1rem',
+        boxShadow: '0 0.5rem 2rem 0 rgba(0, 0, 0, 0.37)',
+        overflow: 'hidden',
+      }}
+    >
+      <Box sx={{ px: 3, pt: 3, pb: pagination && !loading ? 1 : 2 }}>
         <Typography variant="h5" sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
           <StarsOutlinedIcon />
           {loading
             ? t('MESSAGE.SEARCHING')
             : t('MESSAGE.OBJECTS_VISIBLE', { count: objects.length })}
         </Typography>
+
+        {pagination && !loading && (
+          <Typography variant="body2" color="text.secondary" sx={{ mt: 0.75 }}>
+            {t('MESSAGE.PAGINATION_CONTEXT', {
+              page,
+              pageSize: pagination.pageSize,
+              total: pagination.antaresTotalLoci,
+            })}
+          </Typography>
+        )}
       </Box>
 
-      {pagination && !loading && (
-        <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-          {t('MESSAGE.PAGINATION_CONTEXT', {
-            page,
-            pageSize: pagination.pageSize,
-            total: pagination.antaresTotalLoci,
-          })}
-        </Typography>
-      )}
-
-      <Box
-        sx={{
-          background: 'rgba(15, 23, 41, 0.4)',
-          backdropFilter: 'blur(12px)',
-          border: '1px solid rgba(255, 255, 255, 0.3)',
-          borderRadius: '1rem',
-          boxShadow: '0 0.5rem 2rem 0 rgba(0, 0, 0, 0.37)',
-          overflow: 'hidden',
-        }}
-      >
-        <DataTable
+      <DataTable
           columns={columns}
           data={objects}
           keyField="locusId"
@@ -258,7 +266,6 @@ export default function ObjectsList({
             </Box>
           }
         />
-      </Box>
     </Box>
   );
 }
