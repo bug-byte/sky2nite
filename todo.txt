@@ -1,9 +1,9 @@
 Ops
 
 - Unit & Integration Tests
-- Documentation
 - Host on homelab
 - Create CI/CD pipeline to auto-deploy master branch to homelab when changes are made
+- Clean up project structure and API routes
 
 Major Features
 
@@ -13,5 +13,5 @@ Major Features
 
 Bugs / Investigation
 
-- Investigate why 500 records are always returned
+- Re-test all setup methods now that we have a db connection
 - Confirm antares caching implementation makes sense

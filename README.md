@@ -4,6 +4,35 @@ A React + TypeScript web application that uses the ANTARES data broker to show a
 
 ---
 
+## Why Sky2nite exists
+
+The Vera C. Rubin Observatory's Legacy Survey of Space and Time (LSST) scans the entire southern sky every few nights, generating around **10 million alerts per night** — every time a star, galaxy, or transient source changes brightness. ANTARES ingests this data and adds machine-learning classifications, cross-matches, and tags to each alert.
+
+The result is extraordinary science — and an essentially unusable dataset for an amateur astronomer who just wants to know what to point their telescope at tonight.
+
+Sky2nite is a hose on that fire hydrant. It queries ANTARES, filters the stream down to objects that are actually above your horizon, bright enough for a consumer telescope, and visible during reasonable hours — turning millions of nightly alerts into a table you can act on.
+
+### ANTARES API limitations
+
+Working with the ANTARES API involves a few rough edges worth knowing about:
+
+- **No native visibility filtering.** ANTARES has no concept of "observer location" or "above the horizon tonight." Every visibility calculation in Sky2nite — rise/set times, altitude, azimuth, night-time windows — is computed locally after fetching data from ANTARES.
+- **Magnitude is approximate.** ANTARES reports the most recent measured magnitude for a locus, which may be from a single passband (often *g* or *r*) at an arbitrary point in the object's history. It is not a guaranteed current brightness.
+- **Cursor-based pagination only.** The API does not expose a true result count for filtered queries — only an estimate of total loci, a page of results, and a cursor for the next page. The cursor is not a simple `pageSize × (page − 1)` offset: it is the exact ANTARES record index after the last item that survived all filters (magnitude, tags, visibility). Because each page scans an unpredictable number of raw records before filling up with matching objects, the cursor for page N is unknowable without having completed pages 1 through N−1. Sequential forward navigation (1 → 2 → 3) and backward navigation to already-visited pages both work fine. What is impossible is *skipping ahead* to an unvisited page — e.g. jumping from page 1 directly to page 5 — because pages 2–4 have not been fetched and their cursors do not yet exist.
+- **Rate limits and latency.** The ANTARES API can be slow under load and imposes rate limits. Sky2nite caches responses to reduce hammering the upstream service (configured via `CACHE_TTL_SECONDS`).
+- **No guaranteed availability.** ANTARES is a research service, not a consumer product. It can go offline for maintenance or experience data gaps between observing runs.
+
+### The tagging system
+
+ANTARES tags loci with machine-learning classifier outputs and cross-match results (for example `RRLyrae`, `SupernovaCandidate`, `AGN`). These are useful but have notable limitations:
+
+- **Tags are not mutually exclusive.** A single locus can carry dozens of tags from different classifiers, many of which may be speculative or low-confidence. Filtering by a tag does *not* guarantee that classification is correct.
+- **Tag vocabulary is unstable.** New classifiers are added over time and old tag names occasionally change. The tag list Sky2nite shows is fetched live from ANTARES, so what you see reflects the current state of their pipeline.
+- **Many loci are untagged.** A large fraction of ANTARES loci carry no classification tags at all — they are simply "something changed." Requiring a tag in the search filter will silently exclude the majority of alerts.
+- **Classifier scores are hidden.** ANTARES exposes only the tag name, not the underlying probability score. A `SupernovaCandidate` tag could reflect 95% confidence or 51% confidence — Sky2nite cannot distinguish between them.
+
+---
+
 ## Prerequisites
 
 | Requirement | Minimum version | Notes |
@@ -159,15 +188,55 @@ On first launch, Sky2nite shows a **first-time setup** form to create the initia
 
 To run the client and server separately with hot reload:
 
+**1. Start a local PostgreSQL instance**
+
+The server needs a running PostgreSQL database. The quickest way is Docker:
+
 ```bash
-# Terminal 1 — server
+docker run -d \
+  --name sky2nite-dev-db \
+  -e POSTGRES_USER=postgres \
+  -e POSTGRES_PASSWORD=password \
+  -e POSTGRES_DB=sky2nite \
+  -p 5432:5432 \
+  postgres:17
+```
+
+Or use an existing local Postgres installation — just create a `sky2nite` database and a user with access to it.
+
+**2. Configure environment**
+
+```bash
+cp server/.env.example server/.env
+```
+
+The example file ships with `DATABASE_URL=postgresql://postgres:password@localhost:5432/sky2nite`, which matches the Docker command above. Update it if your Postgres credentials differ. At minimum also set `JWT_SECRET` to any non-empty string for local dev.
+
+If you want Google Maps address autocomplete, create `client/.env` with:
+
+```
+VITE_GOOGLE_MAPS_API_KEY=your_api_key_here
+```
+
+**3. Install dependencies**
+
+```bash
+cd server && npm install && cd ../client && npm install
+```
+
+**4. Start the server and client**
+
+```bash
+# Terminal 1 — Express API server (http://localhost:3000)
 cd server && npm run dev
 
-# Terminal 2 — client (add VITE_GOOGLE_MAPS_API_KEY to client/.env for Maps autocomplete)
+# Terminal 2 — Vite dev server (http://localhost:5173)
 cd client && npm run dev
 ```
 
-The Vite dev server proxies API requests to the Express server automatically.
+The Vite dev server proxies `/api` requests to the Express server automatically. Open **http://localhost:5173** in your browser.
+
+On first launch, Sky2nite shows a **first-time setup** form to create the initial user account. Subsequent visits go straight to the login form.
 
 ### Database initialization scripts
 

@@ -101,6 +101,16 @@ export const api = {
     return result.user;
   },
 
+  updateUsername: async (newUsername: string): Promise<AuthUser> => {
+    const result = await requestEnvelope(apiClient.patch<ApiEnvelope<AuthResponse>>('/auth/me/username', { username: newUsername }));
+    storeAuthToken(result.token);
+    return result.user;
+  },
+
+  updatePassword: async (currentPassword: string, newPassword: string): Promise<void> => {
+    await requestEnvelope(apiClient.patch<ApiEnvelope<{ success: boolean }>>('/auth/me/password', { currentPassword, newPassword }));
+  },
+
   // Search for objects visible tonight from a given location
   searchVisibleObjects: async (request: SearchRequest): Promise<SearchResponse> => {
     return requestEnvelope(apiClient.post<ApiEnvelope<SearchResponse>>('/objects/tonight', request));

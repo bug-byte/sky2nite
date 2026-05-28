@@ -4,6 +4,8 @@ import {
   getUserCount,
   issueAuthToken,
   setupFirstUser,
+  updatePassword,
+  updateUsername,
   validateUserCredentials,
 } from '../../services/auth.js';
 import { requireAuth } from './authMiddleware.js';
@@ -61,6 +63,29 @@ authRouter.get(
   responder(async (req) => {
     const authUser = (req as AuthenticatedRequest).authUser;
     return { user: authUser };
+  }),
+);
+
+authRouter.patch(
+  '/me/username',
+  requireAuth,
+  responder(async (req) => {
+    const authUser = (req as AuthenticatedRequest).authUser!;
+    const body = req.body as { username?: string };
+    const user = await updateUsername(authUser.id, body?.username ?? '');
+    const token = issueAuthToken(user);
+    return { user, token };
+  }),
+);
+
+authRouter.patch(
+  '/me/password',
+  requireAuth,
+  responder(async (req) => {
+    const authUser = (req as AuthenticatedRequest).authUser!;
+    const body = req.body as { currentPassword?: string; newPassword?: string };
+    await updatePassword(authUser.id, body?.currentPassword ?? '', body?.newPassword ?? '');
+    return { success: true };
   }),
 );
 

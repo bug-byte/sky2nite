@@ -7,14 +7,21 @@
     "PREVIOUS_PAGE": "Page précédente",
     "SEARCH_SKY_OBJECTS": "Rechercher les objets célestes",
     "USE_MY_LOCATION": "Ma position",
-    "VIEW_DETAILS": "Voir les détails ↗"
+    "VIEW_DETAILS": "Voir les détails ↗",
+    "UPDATE_USERNAME": "Mettre à jour le nom d'utilisateur",
+    "UPDATE_PASSWORD": "Mettre à jour le mot de passe"
   },
   "ERROR": {
     "GEOLOCATION_NOT_SUPPORTED": "La géolocalisation n'est pas prise en charge par votre navigateur",
     "INVALID_LATITUDE": "La latitude doit être entre -90 et 90",
     "INVALID_LONGITUDE": "La longitude doit être entre -180 et 180",
     "LOADING_OBJECTS_FAILED": "Erreur lors du chargement des objets",
-    "LOCATION_FAILED": "Échec de la localisation : {{message}}"
+    "LOCATION_FAILED": "Échec de la localisation : {{message}}",
+    "USERNAME_TOO_SHORT": "Le nom d'utilisateur doit contenir au moins 3 caractères.",
+    "UPDATE_USERNAME_FAILED": "Impossible de mettre à jour le nom d'utilisateur.",
+    "PASSWORD_TOO_SHORT": "Le nouveau mot de passe doit contenir au moins 8 caractères.",
+    "PASSWORDS_DO_NOT_MATCH": "Les nouveaux mots de passe ne correspondent pas.",
+    "UPDATE_PASSWORD_FAILED": "Impossible de mettre à jour le mot de passe."
   },
   "LABEL": {
     "ABOUT_TITLE": "À propos de Sky2nite",
@@ -57,7 +64,17 @@
     "SORT_MAGNITUDE": "Luminosité (magnitude)",
     "PAGE_SIZE": "Lignes par page API",
     "VISIBLE_WINDOW": "Fenêtre de visibilité",
-    "ZTF_ID": "ID ZTF"
+    "ZTF_ID": "ID ZTF",
+    "NAV_OBSERVATIONS": "Observations de ce soir",
+    "NAV_SETTINGS": "Paramètres",
+    "RA_TOOLTIP": "Ascension droite — longitude céleste, en degrés (0–360)",
+    "DEC_TOOLTIP": "Déclinaison — latitude céleste, en degrés (−90 à +90)",
+    "CHANGE_USERNAME": "Modifier le nom d'utilisateur",
+    "NEW_USERNAME": "Nouveau nom d'utilisateur",
+    "CHANGE_PASSWORD": "Modifier le mot de passe",
+    "CURRENT_PASSWORD": "Mot de passe actuel",
+    "NEW_PASSWORD": "Nouveau mot de passe",
+    "CONFIRM_NEW_PASSWORD": "Confirmer le nouveau mot de passe"
   },
   "MESSAGE": {
     "ABOUT_LEARN_MORE": "En savoir plus :",
@@ -83,8 +100,13 @@
     "OBJECTS_VISIBLE_one": "{{count}} objet visible ce soir",
     "OBJECTS_VISIBLE_other": "{{count}} objets visibles ce soir",
     "PAGE_STATUS": "Page {{page}} sur {{totalPages}}",
-    "PAGINATION_CONTEXT": "Page {{page}} — jusqu'à {{pageSize}} objets visibles récupérés par page. ANTARES signale {{total}} loci au total pour cette requête.",
+    "PAGINATION_CONTEXT": "Page {{page}} — jusqu'à {{pageSize}} objets visibles récupérés par page.",
     "SEARCHING": "Balayage du ciel nocturne...",
-    "SEARCHING_SUBTITLE": "Interrogation de la base de données ANTARES et calcul de la visibilité"
+    "SEARCHING_SUBTITLE": "Interrogation de la base de données ANTARES et calcul de la visibilité",
+    "SETTINGS_DESCRIPTION": "Gérez les paramètres de l'application et les identifiants de connexion.",
+    "CURRENT_USERNAME": "Nom d'utilisateur actuel : {{username}}",
+    "CHANGING_PASSWORD_FOR": "Modification du mot de passe pour {{username}}",
+    "USERNAME_UPDATED": "Nom d'utilisateur mis à jour avec succès.",
+    "PASSWORD_UPDATED": "Mot de passe mis à jour avec succès."
   }
 }

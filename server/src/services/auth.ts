@@ -100,6 +100,40 @@ export function verifyAuthToken(token: string): AuthUser | null {
   }
 }
 
+export async function updateUsername(userId: number, newUsername: string): Promise<AuthUser> {
+  const normalized = normalizeUsername(newUsername);
+
+  const conflict = await pool.query<{ id: number }>(
+    'SELECT id FROM users WHERE LOWER(username) = LOWER($1) AND id != $2 LIMIT 1;',
+    [normalized, userId],
+  );
+  if (conflict.rows.length > 0) {
+    throw new Error('That username is already taken.');
+  }
+
+  const result = await pool.query<{ id: number; username: string }>(
+    'UPDATE users SET username = $1 WHERE id = $2 RETURNING id, username;',
+    [normalized, userId],
+  );
+  return result.rows[0];
+}
+
+export async function updatePassword(userId: number, currentPassword: string, newPassword: string): Promise<void> {
+  const result = await pool.query<{ password_hash: string }>(
+    'SELECT password_hash FROM users WHERE id = $1;',
+    [userId],
+  );
+  const row = result.rows[0];
+  if (!row) throw new Error('User not found.');
+
+  const valid = await bcrypt.compare(currentPassword, row.password_hash);
+  if (!valid) throw new Error('Current password is incorrect.');
+
+  validatePassword(newPassword);
+  const newHash = await bcrypt.hash(newPassword, 12);
+  await pool.query('UPDATE users SET password_hash = $1 WHERE id = $2;', [newHash, userId]);
+}
+
 function normalizeUsername(input: string): string {
   const value = input.trim();
   if (value.length < 3 || value.length > 64) {

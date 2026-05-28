@@ -7,14 +7,21 @@
     "PREVIOUS_PAGE": "Previous Page",
     "SEARCH_SKY_OBJECTS": "Search Sky Objects",
     "USE_MY_LOCATION": "Use My Location",
-    "VIEW_DETAILS": "View Details ↗"
+    "VIEW_DETAILS": "View Details ↗",
+    "UPDATE_USERNAME": "Update Username",
+    "UPDATE_PASSWORD": "Update Password"
   },
   "ERROR": {
     "GEOLOCATION_NOT_SUPPORTED": "Geolocation is not supported by your browser",
     "INVALID_LATITUDE": "Latitude must be between -90 and 90",
     "INVALID_LONGITUDE": "Longitude must be between -180 and 180",
     "LOADING_OBJECTS_FAILED": "Error Loading Objects",
-    "LOCATION_FAILED": "Failed to get location: {{message}}"
+    "LOCATION_FAILED": "Failed to get location: {{message}}",
+    "USERNAME_TOO_SHORT": "Username must be at least 3 characters long.",
+    "UPDATE_USERNAME_FAILED": "Failed to update username.",
+    "PASSWORD_TOO_SHORT": "New password must be at least 8 characters long.",
+    "PASSWORDS_DO_NOT_MATCH": "New passwords do not match.",
+    "UPDATE_PASSWORD_FAILED": "Failed to update password."
   },
   "LABEL": {
     "ABOUT_TITLE": "About Sky2nite",
@@ -57,7 +64,17 @@
     "SORT_MAGNITUDE": "Brightness (Magnitude)",
     "PAGE_SIZE": "Rows per API Page",
     "VISIBLE_WINDOW": "Visible Window",
-    "ZTF_ID": "ZTF ID"
+    "ZTF_ID": "ZTF ID",
+    "NAV_OBSERVATIONS": "Tonight's Observations",
+    "NAV_SETTINGS": "Settings",
+    "RA_TOOLTIP": "Right Ascension — celestial longitude, in degrees (0–360)",
+    "DEC_TOOLTIP": "Declination — celestial latitude, in degrees (−90 to +90)",
+    "CHANGE_USERNAME": "Change Username",
+    "NEW_USERNAME": "New Username",
+    "CHANGE_PASSWORD": "Change Password",
+    "CURRENT_PASSWORD": "Current Password",
+    "NEW_PASSWORD": "New Password",
+    "CONFIRM_NEW_PASSWORD": "Confirm New Password"
   },
   "MESSAGE": {
     "ABOUT_LEARN_MORE": "Learn more:",
@@ -83,8 +100,13 @@
     "OBJECTS_VISIBLE_one": "{{count}} Object Visible Tonight",
     "OBJECTS_VISIBLE_other": "{{count}} Objects Visible Tonight",
     "PAGE_STATUS": "Page {{page}} of {{totalPages}}",
-    "PAGINATION_CONTEXT": "Page {{page}} — up to {{pageSize}} visible objects fetched per page. ANTARES reports {{total}} loci total for this query.",
+    "PAGINATION_CONTEXT": "Page {{page}} — up to {{pageSize}} visible objects fetched per page",
     "SEARCHING": "Searching the night sky...",
-    "SEARCHING_SUBTITLE": "Querying ANTARES database and calculating visibility"
+    "SEARCHING_SUBTITLE": "Querying ANTARES database and calculating visibility",
+    "SETTINGS_DESCRIPTION": "Manage app settings and login credentials.",
+    "CURRENT_USERNAME": "Current username: {{username}}",
+    "CHANGING_PASSWORD_FOR": "Changing password for {{username}}",
+    "USERNAME_UPDATED": "Username updated successfully.",
+    "PASSWORD_UPDATED": "Password updated successfully."
   }
 }
