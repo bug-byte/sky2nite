@@ -1,6 +1,7 @@
 import { useState, useRef, useMemo, useEffect, useCallback } from 'react'
 import { Routes, Route } from 'react-router-dom'
 import PageTransition from './PageTransition'
+import StarField from './StarField'
 import { useTranslation } from 'react-i18next'
 import { Box, Container, Typography, Link, Dialog, DialogTitle, DialogContent, DialogContentText } from '@mui/material'
 import NavBar from './navBar/NavBar'
@@ -39,6 +40,12 @@ function App() {
   const [authUser, setAuthUser] = useState<AuthUser | null>(null);
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [filtersVisible, setFiltersVisible] = useState(true);
+  const [particlesEnabled, setParticlesEnabled] = useState(true);
+
+  // Sync body class so the CSS fallback background activates when particles are off
+  useEffect(() => {
+    document.body.classList.toggle('particles-off', !particlesEnabled);
+  }, [particlesEnabled]);
   const { t } = useTranslation();
 
   const { data, isLoading, error } = useVisibleObjects(
@@ -92,6 +99,13 @@ function App() {
             const user = await api.getCurrentUser();
             if (cancelled) return;
             setAuthUser(user);
+            // Load user settings after successful auth
+            try {
+              const settings = await api.getSettings();
+              if (!cancelled) setParticlesEnabled(settings.particlesEnabled);
+            } catch {
+              // settings fetch failing is non-fatal; keep default (true)
+            }
           } catch {
             api.clearAuthToken();
           }
@@ -271,6 +285,7 @@ function App() {
 
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
+      {particlesEnabled && <StarField />}
       <NavBar
         drawerOpen={drawerOpen}
         onDrawerOpen={() => setDrawerOpen(true)}
@@ -322,7 +337,15 @@ function App() {
           } />
           <Route path="/settings" element={
             <Container maxWidth="md" sx={{ mt: 4, mb: 4, px: { xs: 2, md: 3 } }}>
-              <SettingsPage authUser={authUser} onUserUpdated={(updated) => setAuthUser(updated)} />
+              <SettingsPage
+                authUser={authUser}
+                onUserUpdated={(updated) => setAuthUser(updated)}
+                particlesEnabled={particlesEnabled}
+                onParticlesToggle={async (enabled) => {
+                  setParticlesEnabled(enabled);
+                  await api.updateSettings({ particlesEnabled: enabled });
+                }}
+              />
             </Container>
           } />
         </Routes>

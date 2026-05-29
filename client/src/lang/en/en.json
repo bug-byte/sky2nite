@@ -80,7 +80,9 @@
     "CHANGE_PASSWORD": "Change Password",
     "CURRENT_PASSWORD": "Current Password",
     "NEW_PASSWORD": "New Password",
-    "CONFIRM_NEW_PASSWORD": "Confirm New Password"
+    "CONFIRM_NEW_PASSWORD": "Confirm New Password",
+    "APPEARANCE": "Appearance",
+    "PARTICLE_EFFECTS": "Particle Effects"
   },
   "MESSAGE": {
     "ABOUT_LEARN_MORE": "Learn more:",
@@ -110,6 +112,8 @@
     "SEARCHING": "Searching the night sky...",
     "SEARCHING_SUBTITLE": "Querying ANTARES database and calculating visibility",
     "SETTINGS_DESCRIPTION": "Manage app settings and login credentials.",
+    "APPEARANCE_DESCRIPTION": "Customize the visual experience of the app.",
+    "PARTICLE_EFFECTS_DESCRIPTION": "Animated star field with collision effects. Disable to reduce GPU usage.",
     "CURRENT_USERNAME": "Current username: {{username}}",
     "CHANGING_PASSWORD_FOR": "Changing password for {{username}}",
     "USERNAME_UPDATED": "Username updated successfully.",

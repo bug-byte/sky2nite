@@ -6,12 +6,14 @@ import {
   Button,
   CircularProgress,
   Divider,
+  FormControlLabel,
   Paper,
   Stack,
+  Switch,
   TextField,
   Typography,
 } from '@mui/material'
-import { ManageAccounts as ManageAccountsIcon, Lock as LockIcon, Settings as SettingsIcon } from '@mui/icons-material'
+import { AutoAwesome as AutoAwesomeIcon, ManageAccounts as ManageAccountsIcon, Lock as LockIcon, Settings as SettingsIcon } from '@mui/icons-material'
 import { useTranslation } from 'react-i18next'
 import { api } from '../../services/api'
 import type { AuthUser } from '../../services/api'
@@ -19,6 +21,8 @@ import type { AuthUser } from '../../services/api'
 type SettingsPageProps = {
   authUser: AuthUser
   onUserUpdated: (user: AuthUser) => void
+  particlesEnabled: boolean
+  onParticlesToggle: (enabled: boolean) => Promise<void>
 }
 
 function ChangeUsernameForm({ authUser, onUserUpdated }: SettingsPageProps) {
@@ -207,8 +211,19 @@ function ChangePasswordForm({ authUser }: { authUser: AuthUser }) {
   )
 }
 
-export default function SettingsPage({ authUser, onUserUpdated }: SettingsPageProps) {
+export default function SettingsPage({ authUser, onUserUpdated, particlesEnabled, onParticlesToggle }: SettingsPageProps) {
   const { t } = useTranslation()
+  const [particlesLoading, setParticlesLoading] = useState(false)
+
+  const handleParticlesToggle = async () => {
+    setParticlesLoading(true)
+    try {
+      await onParticlesToggle(!particlesEnabled)
+    } finally {
+      setParticlesLoading(false)
+    }
+  }
+
   return (
     <Stack spacing={3} sx={{ maxWidth: 520, mx: 'auto' }}>
       <Box>
@@ -220,6 +235,45 @@ export default function SettingsPage({ authUser, onUserUpdated }: SettingsPagePr
           {t('MESSAGE.SETTINGS_DESCRIPTION')}
         </Typography>
       </Box>
+
+      {/* Appearance */}
+      <Paper
+        sx={{
+          p: 3,
+          background: 'rgba(15, 23, 41, 0.4)',
+          backdropFilter: 'blur(12px)',
+          border: '1px solid rgba(255, 255, 255, 0.15)',
+          borderRadius: '1rem',
+          boxShadow: '0 0.5rem 2rem 0 rgba(0, 0, 0, 0.37)',
+        }}
+      >
+        <Typography variant="h6" sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 0.5 }}>
+          <AutoAwesomeIcon fontSize="small" sx={{ position: 'relative', top: '-0.1em' }} />
+          {t('LABEL.APPEARANCE')}
+        </Typography>
+        <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+          {t('MESSAGE.APPEARANCE_DESCRIPTION')}
+        </Typography>
+        <FormControlLabel
+          control={
+            <Switch
+              checked={particlesEnabled}
+              onChange={() => void handleParticlesToggle()}
+              disabled={particlesLoading}
+              color="primary"
+            />
+          }
+          label={
+            <Box>
+              <Typography variant="body2">{t('LABEL.PARTICLE_EFFECTS')}</Typography>
+              <Typography variant="caption" color="text.secondary">
+                {t('MESSAGE.PARTICLE_EFFECTS_DESCRIPTION')}
+              </Typography>
+            </Box>
+          }
+        />
+      </Paper>
+
       <ChangeUsernameForm authUser={authUser} onUserUpdated={onUserUpdated} />
       <ChangePasswordForm authUser={authUser} />
     </Stack>

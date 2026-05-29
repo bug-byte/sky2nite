@@ -36,12 +36,28 @@ export default function StarField() {
     // Numeric pair key (i < j always): i * STAR_COUNT + j
     const collidingPairs = new Set<number>();
 
+    // Pre-render a glow sprite once — reused via drawImage instead of
+    // recreating a radial gradient for every large star every frame.
+    const GLOW_SPRITE_SIZE = 48;
+    const glowSprite = document.createElement('canvas');
+    glowSprite.width = GLOW_SPRITE_SIZE;
+    glowSprite.height = GLOW_SPRITE_SIZE;
+    const gc = glowSprite.getContext('2d')!;
+    const ctr = GLOW_SPRITE_SIZE / 2;
+    const glowGrd = gc.createRadialGradient(ctr, ctr, 0, ctr, ctr, ctr);
+    glowGrd.addColorStop(0, 'rgba(180, 210, 255, 0.38)');
+    glowGrd.addColorStop(1, 'rgba(0, 0, 0, 0)');
+    gc.beginPath();
+    gc.arc(ctr, ctr, ctr, 0, Math.PI * 2);
+    gc.fillStyle = glowGrd;
+    gc.fill();
+
     // Mouse state — plain mutable object, no React overhead
     const mouse = { x: -9999, y: -9999, active: false };
     const onMouseMove = (e: MouseEvent) => { mouse.x = e.clientX; mouse.y = e.clientY; mouse.active = true; };
     const onMouseLeave = () => { mouse.active = false; };
-    window.addEventListener('mousemove', onMouseMove);
-    window.addEventListener('mouseleave', onMouseLeave);
+    window.addEventListener('mousemove', onMouseMove, { passive: true });
+    window.addEventListener('mouseleave', onMouseLeave, { passive: true });
 
     const CURSOR_REPEL_RADIUS = 85;
     const CURSOR_REPEL_STRENGTH = 1.2;  // pixels per frame at closest point
@@ -70,14 +86,16 @@ export default function StarField() {
 
     resize();
     initStars();
-    window.addEventListener('resize', resize);
+    window.addEventListener('resize', resize, { passive: true });
 
     let lastTime = performance.now();
+    let frameCount = 0;
 
     const draw = (now: number) => {
       const dt = Math.min(now - lastTime, 50);
       lastTime = now;
       const t = now / 1000;
+      frameCount++;
 
       ctx.clearRect(0, 0, canvas.width, canvas.height);
 
@@ -106,26 +124,29 @@ export default function StarField() {
         else if (star.y > canvas.height + 2) star.y = -2;
       }
 
-      // Collision detection — fires only when stars actually touch (dist ≤ sum of radii)
-      for (let i = 0; i < stars.length; i++) {
-        for (let j = i + 1; j < stars.length; j++) {
-          const dx = stars[i].x - stars[j].x;
-          const dy = stars[i].y - stars[j].y;
-          const distSq = dx * dx + dy * dy;
-          const touchDist = stars[i].radius + stars[j].radius;
-          const key = i * STAR_COUNT + j;
+      // Collision detection — throttled to every 3rd frame (stars move <1px/frame,
+      // so missed frames produce zero visible difference)
+      if (frameCount % 3 === 0) {
+        for (let i = 0; i < stars.length; i++) {
+          for (let j = i + 1; j < stars.length; j++) {
+            const dx = stars[i].x - stars[j].x;
+            const dy = stars[i].y - stars[j].y;
+            const distSq = dx * dx + dy * dy;
+            const touchDist = stars[i].radius + stars[j].radius;
+            const key = i * STAR_COUNT + j;
 
-          if (distSq <= touchDist * touchDist) {
-            if (!collidingPairs.has(key) && flashes.length < MAX_FLASHES) {
-              collidingPairs.add(key);
-              flashes.push({
-                x: (stars[i].x + stars[j].x) / 2,
-                y: (stars[i].y + stars[j].y) / 2,
-                createdAt: now,
-              });
+            if (distSq <= touchDist * touchDist) {
+              if (!collidingPairs.has(key) && flashes.length < MAX_FLASHES) {
+                collidingPairs.add(key);
+                flashes.push({
+                  x: (stars[i].x + stars[j].x) / 2,
+                  y: (stars[i].y + stars[j].y) / 2,
+                  createdAt: now,
+                });
+              }
+            } else {
+              collidingPairs.delete(key);
             }
-          } else {
-            collidingPairs.delete(key);
           }
         }
       }
@@ -168,16 +189,13 @@ export default function StarField() {
         const twinkle = 0.15 * Math.sin(t * star.twinkleSpeed * Math.PI * 2 + star.twinkleOffset);
         const opacity = Math.max(0.05, Math.min(1, star.baseOpacity + twinkle));
 
-        // Soft glow halo for larger stars only
-        if (star.radius > 1.1) {
+        // Soft glow halo for larger stars — drawn via pre-rendered sprite (no per-star gradient)
+        if (star.radius > 1.4) {
           const glowR = star.radius * 3.5;
-          const grd = ctx.createRadialGradient(star.x, star.y, 0, star.x, star.y, glowR);
-          grd.addColorStop(0, `rgba(180, 210, 255, ${opacity * 0.3})`);
-          grd.addColorStop(1, 'rgba(0, 0, 0, 0)');
-          ctx.beginPath();
-          ctx.arc(star.x, star.y, glowR, 0, Math.PI * 2);
-          ctx.fillStyle = grd;
-          ctx.fill();
+          const d = glowR * 2;
+          ctx.globalAlpha = opacity * 0.9;
+          ctx.drawImage(glowSprite, star.x - glowR, star.y - glowR, d, d);
+          ctx.globalAlpha = 1;
         }
 
         // Core star dot (slightly blue-white tint)

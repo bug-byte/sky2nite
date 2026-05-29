@@ -80,7 +80,9 @@
     "CHANGE_PASSWORD": "Modifier le mot de passe",
     "CURRENT_PASSWORD": "Mot de passe actuel",
     "NEW_PASSWORD": "Nouveau mot de passe",
-    "CONFIRM_NEW_PASSWORD": "Confirmer le nouveau mot de passe"
+    "CONFIRM_NEW_PASSWORD": "Confirmer le nouveau mot de passe",
+    "APPEARANCE": "Apparence",
+    "PARTICLE_EFFECTS": "Effets de particules"
   },
   "MESSAGE": {
     "ABOUT_LEARN_MORE": "En savoir plus :",
@@ -110,6 +112,8 @@
     "SEARCHING": "Balayage du ciel nocturne...",
     "SEARCHING_SUBTITLE": "Interrogation de la base de données ANTARES et calcul de la visibilité",
     "SETTINGS_DESCRIPTION": "Gérez les paramètres de l'application et les identifiants de connexion.",
+    "APPEARANCE_DESCRIPTION": "Personnalisez l'expérience visuelle de l'application.",
+    "PARTICLE_EFFECTS_DESCRIPTION": "Champ d'étoiles animé avec effets de collision. Désactiver pour réduire l'utilisation GPU.",
     "CURRENT_USERNAME": "Nom d'utilisateur actuel : {{username}}",
     "CHANGING_PASSWORD_FOR": "Modification du mot de passe pour {{username}}",
     "USERNAME_UPDATED": "Nom d'utilisateur mis à jour avec succès.",

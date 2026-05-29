@@ -135,6 +135,15 @@ export const api = {
   deleteObservation: async (id: number): Promise<void> => {
     await requestEnvelope(apiClient.delete<ApiEnvelope<{ success: true }>>(`/observations/${id}`));
   },
+
+  // User settings
+  getSettings: async (): Promise<{ particlesEnabled: boolean }> => {
+    return requestEnvelope(apiClient.get<ApiEnvelope<{ particlesEnabled: boolean }>>('/settings'));
+  },
+
+  updateSettings: async (patch: { particlesEnabled?: boolean }): Promise<{ particlesEnabled: boolean }> => {
+    return requestEnvelope(apiClient.patch<ApiEnvelope<{ particlesEnabled: boolean }>>('/settings', patch));
+  },
 };
 
 export default api;

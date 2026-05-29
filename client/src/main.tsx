@@ -6,7 +6,6 @@ import { ThemeProvider, createTheme, CssBaseline } from '@mui/material'
 import './index.css'
 import './i18n'
 import App from './ui/shell/App'
-import StarField from './ui/shell/StarField'
 
 // Create React Query client
 const queryClient = new QueryClient({
@@ -44,7 +43,6 @@ createRoot(document.getElementById('root')!).render(
       <QueryClientProvider client={queryClient}>
         <ThemeProvider theme={theme}>
           <CssBaseline />
-          <StarField />
           <App />
         </ThemeProvider>
       </QueryClientProvider>

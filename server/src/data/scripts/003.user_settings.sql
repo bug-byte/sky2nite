@@ -1,0 +1,5 @@
+CREATE TABLE IF NOT EXISTS user_settings (
+  user_id          INTEGER PRIMARY KEY REFERENCES users(id) ON DELETE CASCADE,
+  particles_enabled BOOLEAN NOT NULL DEFAULT TRUE,
+  updated_at       TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
