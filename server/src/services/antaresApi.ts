@@ -1,6 +1,69 @@
-import type { AntaresLocus, AntaresListResponse, AntaresLocusListing, CacheEntry } from '../types/index.js';
+// ANTARES API Types — JSON:API format
+type AntaresLocusListingAttributes = {
+  ra: number;
+  dec: number;
+  tags: string[];
+  catalogs: string[];
+  htm16: number;
+  properties: {
+    ztf_object_id?: string;
+    newest_alert_magnitude?: number;
+    newest_alert_observation_time?: number;
+    brightest_alert_magnitude?: number;
+    brightest_alert_observation_time?: number;
+    num_alerts?: number;
+    num_mag_values?: number;
+    [key: string]: any;
+  };
+}
 
-interface LociAtOffsetResult {
+type AntaresLocusListing = {
+  type: string;
+  id: string;
+  attributes: AntaresLocusListingAttributes;
+  relationships: Record<string, any>;
+  meta: Record<string, any>;
+}
+
+type AntaresListResponse = {
+  data: AntaresLocusListing[];
+  links: {
+    self: string;
+    next?: string;
+  };
+  meta: {
+    count: number;
+  };
+}
+
+type AntaresLocus = {
+  locus_id: string;
+  ra: number;
+  dec: number;
+  properties: {
+    ztf_object_id?: string;
+    lsst_dia_object_id?: string;
+    num_mag_values?: number;
+    num_alerts?: number;
+    brightest_alert_magnitude?: number;
+    newest_alert_magnitude?: number;
+    newest_alert_observation_time?: number;
+    [key: string]: any;
+  };
+  tags: string[];
+  catalogs?: string[];
+  catalog_objects?: Record<string, any[]>;
+  watch_list_ids?: string[];
+  grav_wave_events?: string[];
+}
+
+type CacheEntry<T> = {
+  data: T;
+  timestamp: number;
+  ttl: number;
+}
+
+type LociAtOffsetResult = {
   loci: AntaresLocus[];
   antaresTotalLoci: number;
   hasNextPage: boolean;

@@ -1,15 +1,7 @@
 import bcrypt from 'bcryptjs';
 import pool from '../../services/db.js';
-import { validatePassword, type AuthUser } from '../../util/auth.js';
-
-export interface UpdatePasswordResult {
-  success: true;
-}
-
-export interface UpdatePasswordRequest {
-  currentPassword?: string;
-  newPassword?: string;
-}
+import { validatePassword } from '../../util/auth.js';
+import type { AuthUser, UpdatePasswordRequest, UpdatePasswordResult } from 'shared/types.js';
 
 export async function updatePasswordCommand(authUser: AuthUser, body: UpdatePasswordRequest): Promise<UpdatePasswordResult> {
   const currentPassword = body?.currentPassword ?? '';

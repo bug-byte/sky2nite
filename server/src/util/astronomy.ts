@@ -1,5 +1,5 @@
 import { createRequire } from 'module';
-import type { VisibilityWindow } from '../types/index.js';
+import type { VisibilityWindow } from 'shared/types.js';
 
 // astronomy-engine is a CJS package without "type":"module", so named ESM imports
 // fail under Node's static analysis. Load the CJS build directly via createRequire.

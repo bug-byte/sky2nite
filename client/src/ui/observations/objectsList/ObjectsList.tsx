@@ -23,7 +23,7 @@ import {
 } from "@mui/icons-material";
 import { useMemo } from "react";
 import { useTranslation } from "react-i18next";
-import type { VisibleObject } from '../../../types/api';
+import type { VisibleObject } from 'shared/types';
 import SkyPreview from './skyPreview/SkyPreview';
 
 // Dark glass theme matching the app's visual style
@@ -51,7 +51,7 @@ createTheme(
   "dark",
 );
 
-interface ObjectsListProps {
+type ObjectsListProps = {
   objects: VisibleObject[];
   loading: boolean;
   error: Error | null;

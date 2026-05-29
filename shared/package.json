@@ -1,0 +1,6 @@
+{
+  "name": "sky2nite-shared",
+  "version": "1.0.0",
+  "description": "Types shared between client and server",
+  "private": true
+}

@@ -1,25 +1,22 @@
 import axios from 'axios';
-import type { SearchRequest, SearchResponse } from '../types/api';
+import type { SearchRequest, SearchResponse } from 'shared/types';
+import type { AuthUser } from 'shared/types';
+export type { AuthUser };
 
 const API_BASE_URL = import.meta.env.VITE_API_URL || '/api';
 const AUTH_TOKEN_STORAGE_KEY = 'sky2nite.authToken';
 
-interface ApiEnvelope<T> {
+type ApiEnvelope<T> = {
   result: T;
   err?: string;
   id?: string;
 }
 
-export interface AuthUser {
-  id: number;
-  username: string;
-}
-
-interface SetupStatusResponse {
+type SetupStatusResponse = {
   isSetupComplete: boolean;
 }
 
-interface AuthResponse {
+type AuthResponse = {
   user: AuthUser;
   token: string;
 }

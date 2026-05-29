@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Box, Typography } from "@mui/material";
 
-interface SkyPreviewProps {
+type SkyPreviewProps = {
   ra: number;
   dec: number;
   antaresUrl: string;

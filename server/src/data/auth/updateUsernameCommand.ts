@@ -1,16 +1,8 @@
 import pool from '../../services/db.js';
-import { issueAuthToken, normalizeUsername, type AuthUser } from '../../util/auth.js';
+import { issueAuthToken, normalizeUsername } from '../../util/auth.js';
+import type { AuthUser, AuthResponse, UpdateUsernameRequest } from 'shared/types.js';
 
-export interface UpdateUsernameResult {
-  user: AuthUser;
-  token: string;
-}
-
-export interface UpdateUsernameRequest {
-  username?: string;
-}
-
-export async function updateUsernameCommand(authUser: AuthUser, body: UpdateUsernameRequest): Promise<UpdateUsernameResult> {
+export async function updateUsernameCommand(authUser: AuthUser, body: UpdateUsernameRequest): Promise<AuthResponse> {
   const normalized = normalizeUsername(body?.username ?? '');
 
   const conflict = await pool.query<{ id: number }>(

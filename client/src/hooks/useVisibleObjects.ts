@@ -1,6 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
 import { api } from '../services/api';
-import type { SearchRequest, SearchResponse } from '../types/api';
+import type { SearchRequest, SearchResponse } from 'shared/types';
 
 export const useVisibleObjects = (
   request: SearchRequest | null,

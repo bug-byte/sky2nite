@@ -1,18 +1,9 @@
 import bcrypt from 'bcryptjs';
 import pool from '../../services/db.js';
-import { issueAuthToken, type AuthUser } from '../../util/auth.js';
+import { issueAuthToken } from '../../util/auth.js';
+import type { AuthUser, AuthResponse, LoginRequest } from 'shared/types.js';
 
-export interface LoginResult {
-  user: AuthUser;
-  token: string;
-}
-
-export interface LoginRequest {
-  username?: string;
-  password?: string;
-}
-
-export async function loginCommand(body: LoginRequest): Promise<LoginResult> {
+export async function loginCommand(body: LoginRequest): Promise<AuthResponse> {
   const username = (body?.username ?? '').trim();
   const password = body?.password ?? '';
 

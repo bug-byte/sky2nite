@@ -12,7 +12,7 @@ import {
 } from "@mui/material";
 import { TravelExplore as TravelExploreIcon } from "@mui/icons-material";
 
-interface AuthCardProps {
+type AuthCardProps = {
   mode: "setup" | "login";
   loading: boolean;
   error: string | null;

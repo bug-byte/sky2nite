@@ -2,13 +2,13 @@ import { Typography, Slider, Box, Paper } from "@mui/material";
 import { TuneOutlined as TuneOutlinedIcon } from "@mui/icons-material";
 import { useTranslation } from "react-i18next";
 
-export interface Filters {
+export type Filters = {
   maxMagnitude: number;
   objectTypes: string[];
   minAltitude: number;
 }
 
-interface FilterControlsProps {
+type FilterControlsProps = {
   filters: Filters;
   onFiltersChange: (filters: Filters) => void;
 }

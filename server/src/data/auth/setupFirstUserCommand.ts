@@ -1,18 +1,9 @@
 import bcrypt from 'bcryptjs';
 import pool from '../../services/db.js';
-import { issueAuthToken, normalizeUsername, validatePassword, type AuthUser } from '../../util/auth.js';
+import { issueAuthToken, normalizeUsername, validatePassword } from '../../util/auth.js';
+import type { AuthResponse, SetupFirstUserRequest } from 'shared/types.js';
 
-export interface SetupFirstUserResult {
-  user: AuthUser;
-  token: string;
-}
-
-export interface SetupFirstUserRequest {
-  username?: string;
-  password?: string;
-}
-
-export async function setupFirstUserCommand(body: SetupFirstUserRequest): Promise<SetupFirstUserResult> {
+export async function setupFirstUserCommand(body: SetupFirstUserRequest): Promise<AuthResponse> {
   const username = normalizeUsername(body?.username ?? '');
   validatePassword(body?.password ?? '');
 

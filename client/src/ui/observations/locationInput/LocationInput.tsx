@@ -21,13 +21,13 @@ import {
   MyLocation as MyLocationIcon,
 } from "@mui/icons-material";
 
-interface LocationInputProps {
+type LocationInputProps = {
   onLocationChange: (latitude: number, longitude: number) => void;
   onLoadingChange?: (loading: boolean) => void;
   locationRequired?: boolean;
 }
 
-export interface LocationInputHandle {
+export type LocationInputHandle = {
   submit: () => void;
   useCurrentLocation: () => void;
 }

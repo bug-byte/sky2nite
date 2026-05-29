@@ -5,6 +5,9 @@ WORKDIR /app/client
 COPY client/package*.json ./
 RUN npm ci
 
+# Copy shared source so Vite can resolve type-only imports
+COPY shared/ /app/shared/
+
 COPY client/ ./
 ARG VITE_GOOGLE_MAPS_API_KEY
 ENV VITE_GOOGLE_MAPS_API_KEY=$VITE_GOOGLE_MAPS_API_KEY
@@ -16,6 +19,9 @@ WORKDIR /app/server
 
 COPY server/package*.json ./
 RUN npm ci
+
+# Copy shared source so `tsc --build` can compile it first
+COPY shared/ /app/shared/
 
 COPY server/ ./
 RUN npm run build

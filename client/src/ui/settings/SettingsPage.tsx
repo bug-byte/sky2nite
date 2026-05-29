@@ -16,7 +16,7 @@ import { useTranslation } from 'react-i18next'
 import { api } from '../../services/api'
 import type { AuthUser } from '../../services/api'
 
-interface SettingsPageProps {
+type SettingsPageProps = {
   authUser: AuthUser
   onUserUpdated: (user: AuthUser) => void
 }

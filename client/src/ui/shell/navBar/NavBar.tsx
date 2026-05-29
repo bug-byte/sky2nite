@@ -32,7 +32,7 @@ export const NAV_ITEMS: { id: Page; labelKey: string; icon: ReactElement }[] = [
   { id: 'settings', labelKey: 'LABEL.NAV_SETTINGS', icon: <SettingsIcon fontSize="small" /> },
 ]
 
-interface NavBarProps {
+type NavBarProps = {
   activePage: Page
   onNavigate: (page: Page) => void
   drawerOpen: boolean

@@ -1,7 +1,7 @@
 import type { NextFunction, Request, Response } from 'express';
 import { verifyAuthToken, type AuthUser } from '../../util/auth.js';
 
-export interface AuthenticatedRequest extends Request {
+export type AuthenticatedRequest = Request & {
   authUser?: AuthUser;
 }
 

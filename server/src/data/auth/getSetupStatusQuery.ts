@@ -1,8 +1,5 @@
 import pool from '../../services/db.js';
-
-export interface SetupStatus {
-  isSetupComplete: boolean;
-}
+import type { SetupStatus } from 'shared/types.js';
 
 export async function getSetupStatusQuery(): Promise<SetupStatus> {
   const result = await pool.query<{ count: string }>('SELECT COUNT(*)::text AS count FROM users;');

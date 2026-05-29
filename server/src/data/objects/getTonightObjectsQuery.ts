@@ -1,22 +1,13 @@
 import { antaresApi } from '../../services/antaresApi.js';
 import { calculateNightWindow, calculateVisibility } from '../../util/astronomy.js';
 import getLogger from '../../util/getLogger.js';
-import type { SearchRequest, SearchResponsePagination, VisibleObject } from '../../types/index.js';
+import type { SearchRequest, SearchResponse, SearchResponsePagination, VisibleObject } from 'shared/types.js';
 
 const log = getLogger('getTonightObjectsQuery');
 
 const ANTARES_BATCH_SIZE = 500;
 
-export interface TonightResult {
-  location: { latitude: number; longitude: number };
-  date: string;
-  nightWindow: { sunset: string; sunrise: string };
-  objects: VisibleObject[];
-  count: number;
-  pagination: SearchResponsePagination;
-}
-
-export async function getTonightObjectsQuery(request: SearchRequest): Promise<TonightResult> {
+export async function getTonightObjectsQuery(request: SearchRequest): Promise<SearchResponse> {
   const { latitude, longitude, filters = {}, pagination = {} } = request;
 
   if (typeof latitude !== 'number' || latitude < -90 || latitude > 90) {

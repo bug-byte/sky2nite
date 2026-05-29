@@ -22,9 +22,9 @@ import { useTranslation } from 'react-i18next'
 import LocationInput, { type LocationInputHandle } from './locationInput/LocationInput'
 import FilterControls, { type Filters } from './filterControls/FilterControls'
 import ObjectsList from './objectsList/ObjectsList'
-import type { SearchRequest, VisibleObject } from '../../types/api'
+import type { SearchRequest, VisibleObject } from 'shared/types'
 
-interface ObservationsPageProps {
+type ObservationsPageProps = {
   locationRef: RefObject<LocationInputHandle | null>
   filters: Filters
   onFiltersChange: (filters: Filters) => void
