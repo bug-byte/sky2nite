@@ -1,5 +1,5 @@
 import axios from 'axios';
-import type { SearchRequest, SearchResponse } from 'shared/types';
+import type { SearchRequest, SearchResponse, SavedObservation, SaveObservationRequest } from 'shared/types';
 import type { AuthUser } from 'shared/types';
 export type { AuthUser };
 
@@ -121,6 +121,19 @@ export const api = {
   // Health check
   healthCheck: async (): Promise<{ status: string; timestamp: string }> => {
     return requestEnvelope(apiClient.get<ApiEnvelope<{ status: string; timestamp: string }>>('/objects/health'));
+  },
+
+  // Saved observations
+  getObservations: async (): Promise<SavedObservation[]> => {
+    return requestEnvelope(apiClient.get<ApiEnvelope<SavedObservation[]>>('/observations'));
+  },
+
+  saveObservation: async (body: SaveObservationRequest): Promise<SavedObservation> => {
+    return requestEnvelope(apiClient.post<ApiEnvelope<SavedObservation>>('/observations', body));
+  },
+
+  deleteObservation: async (id: number): Promise<void> => {
+    await requestEnvelope(apiClient.delete<ApiEnvelope<{ success: true }>>(`/observations/${id}`));
   },
 };
 

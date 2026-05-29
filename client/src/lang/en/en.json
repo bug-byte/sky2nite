@@ -9,7 +9,10 @@
     "USE_MY_LOCATION": "Use My Location",
     "VIEW_DETAILS": "View Details ↗",
     "UPDATE_USERNAME": "Update Username",
-    "UPDATE_PASSWORD": "Update Password"
+    "UPDATE_PASSWORD": "Update Password",
+    "SAVE_OBSERVATION": "Save Observation",
+    "SAVED": "Saved",
+    "DELETE": "Delete"
   },
   "ERROR": {
     "GEOLOCATION_NOT_SUPPORTED": "Geolocation is not supported by your browser",
@@ -68,6 +71,8 @@
     "ZTF_ID": "ZTF ID",
     "NAV_OBSERVATIONS": "Tonight's Observations",
     "NAV_SETTINGS": "Settings",
+    "NAV_MY_OBSERVATIONS": "My Observations",
+    "SAVED_ON": "Saved On",
     "RA_TOOLTIP": "Right Ascension — celestial longitude, in degrees (0–360)",
     "DEC_TOOLTIP": "Declination — celestial latitude, in degrees (−90 to +90)",
     "CHANGE_USERNAME": "Change Username",
@@ -108,6 +113,10 @@
     "CURRENT_USERNAME": "Current username: {{username}}",
     "CHANGING_PASSWORD_FOR": "Changing password for {{username}}",
     "USERNAME_UPDATED": "Username updated successfully.",
-    "PASSWORD_UPDATED": "Password updated successfully."
+    "PASSWORD_UPDATED": "Password updated successfully.",
+    "MY_OBSERVATIONS_DESCRIPTION": "Celestial objects you've bookmarked for tonight's viewing session.",
+    "NO_SAVED_OBSERVATIONS": "You haven't saved any observations yet. Click the bookmark icon on any object to save it here.",
+    "OBSERVATIONS_SAVED_one": "{{count}} Saved Observation",
+    "OBSERVATIONS_SAVED_other": "{{count}} Saved Observations"
   }
 }

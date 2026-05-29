@@ -1,3 +1,4 @@
+import { useState, useEffect } from "react";
 import { Typography, Slider, Box, Paper } from "@mui/material";
 import { TuneOutlined as TuneOutlinedIcon } from "@mui/icons-material";
 import { useTranslation } from "react-i18next";
@@ -19,24 +20,41 @@ export default function FilterControls({
 }: FilterControlsProps) {
   const { t } = useTranslation();
 
+  // Local state tracks the visual slider position during drag.
+  // onFiltersChange (which triggers a network request) is only called on commit.
+  const [localMagnitude, setLocalMagnitude] = useState(filters.maxMagnitude);
+  const [localAltitude, setLocalAltitude] = useState(filters.minAltitude);
+
+  // Sync local state if filters change externally (e.g. reset), but not during drag.
+  useEffect(() => { setLocalMagnitude(filters.maxMagnitude); }, [filters.maxMagnitude]);
+  useEffect(() => { setLocalAltitude(filters.minAltitude); }, [filters.minAltitude]);
+
   const handleMagnitudeChange = (
     _event: Event,
     newValue: number | number[],
   ) => {
-    onFiltersChange({
-      ...filters,
-      maxMagnitude: newValue as number,
-    });
+    setLocalMagnitude(newValue as number);
+  };
+
+  const handleMagnitudeCommit = (
+    _event: React.SyntheticEvent | Event,
+    newValue: number | number[],
+  ) => {
+    onFiltersChange({ ...filters, maxMagnitude: newValue as number });
   };
 
   const handleMinAltitudeChange = (
     _event: Event,
     newValue: number | number[],
   ) => {
-    onFiltersChange({
-      ...filters,
-      minAltitude: newValue as number,
-    });
+    setLocalAltitude(newValue as number);
+  };
+
+  const handleMinAltitudeCommit = (
+    _event: React.SyntheticEvent | Event,
+    newValue: number | number[],
+  ) => {
+    onFiltersChange({ ...filters, minAltitude: newValue as number });
   };
 
   const getMagnitudeLabel = (value: number) => {
@@ -75,11 +93,12 @@ export default function FilterControls({
         <Box sx={{ flex: 1, minWidth: 0 }}>
           <Typography gutterBottom>
             {t("LABEL.MAXIMUM_MAGNITUDE")}:{" "}
-            {getMagnitudeLabel(filters.maxMagnitude)}
+            {getMagnitudeLabel(localMagnitude)}
           </Typography>
           <Slider
-            value={filters.maxMagnitude}
+            value={localMagnitude}
             onChange={handleMagnitudeChange}
+            onChangeCommitted={handleMagnitudeCommit}
             min={10}
             max={18}
             step={0.5}
@@ -99,11 +118,12 @@ export default function FilterControls({
 
         <Box sx={{ flex: 1, minWidth: 0 }}>
           <Typography gutterBottom>
-            {t("LABEL.MINIMUM_ALTITUDE")}: {filters.minAltitude}°
+            {t("LABEL.MINIMUM_ALTITUDE")}: {localAltitude}°
           </Typography>
           <Slider
-            value={filters.minAltitude}
+            value={localAltitude}
             onChange={handleMinAltitudeChange}
+            onChangeCommitted={handleMinAltitudeCommit}
             min={0}
             max={60}
             step={5}

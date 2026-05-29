@@ -6,7 +6,7 @@ Ops
 Major Features
 
 - Future alerts / notifications
-- My Observations page (requires postgres)
+- Add background particle effect
 - add a "buy me a coffee" paypal link thing
 
 Bugs / Investigation

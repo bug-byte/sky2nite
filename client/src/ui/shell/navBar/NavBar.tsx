@@ -20,21 +20,20 @@ import {
   Menu as MenuIcon,
   NightsStay as NightsStayIcon,
   Settings as SettingsIcon,
+  BookmarkAdded as BookmarkAddedIcon,
 } from '@mui/icons-material'
 import { type ReactElement } from 'react'
+import { useNavigate, useLocation } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import type { AuthUser } from '../../../services/api'
 
-export type Page = 'observations' | 'settings'
-
-export const NAV_ITEMS: { id: Page; labelKey: string; icon: ReactElement }[] = [
-  { id: 'observations', labelKey: 'LABEL.NAV_OBSERVATIONS', icon: <NightsStayIcon fontSize="small" /> },
-  { id: 'settings', labelKey: 'LABEL.NAV_SETTINGS', icon: <SettingsIcon fontSize="small" /> },
+const NAV_ITEMS: { path: string; labelKey: string; icon: ReactElement }[] = [
+  { path: '/', labelKey: 'LABEL.NAV_OBSERVATIONS', icon: <NightsStayIcon fontSize="small" /> },
+  { path: '/my-observations', labelKey: 'LABEL.NAV_MY_OBSERVATIONS', icon: <BookmarkAddedIcon fontSize="small" /> },
+  { path: '/settings', labelKey: 'LABEL.NAV_SETTINGS', icon: <SettingsIcon fontSize="small" /> },
 ]
 
 type NavBarProps = {
-  activePage: Page
-  onNavigate: (page: Page) => void
   drawerOpen: boolean
   onDrawerOpen: () => void
   onDrawerClose: () => void
@@ -44,8 +43,6 @@ type NavBarProps = {
 }
 
 export default function NavBar({
-  activePage,
-  onNavigate,
   drawerOpen,
   onDrawerOpen,
   onDrawerClose,
@@ -54,6 +51,11 @@ export default function NavBar({
   onAboutOpen,
 }: NavBarProps) {
   const { t, i18n } = useTranslation()
+  const navigate = useNavigate()
+  const location = useLocation()
+
+  const isActive = (path: string) =>
+    path === '/' ? location.pathname === '/' : location.pathname.startsWith(path)
 
   return (
     <>
@@ -79,7 +81,7 @@ export default function NavBar({
 
           <Box
             sx={{ display: 'flex', alignItems: 'center', gap: 0.75, minWidth: 0, flexShrink: 0, cursor: 'pointer' }}
-            onClick={() => onNavigate('observations')}
+            onClick={() => navigate('/')}
           >
             <TravelExploreIcon sx={{ fontSize: { xs: '1.25rem', sm: '1.5rem' } }} />
             <Typography
@@ -93,14 +95,14 @@ export default function NavBar({
           <Box sx={{ display: { xs: 'none', md: 'flex' }, gap: 0.5, ml: 2, flexGrow: 1 }}>
             {NAV_ITEMS.map((item) => (
               <Button
-                key={item.id}
+                key={item.path}
                 color="inherit"
-                onClick={() => onNavigate(item.id)}
+                onClick={() => navigate(item.path)}
                 startIcon={item.icon}
                 sx={{
                   textTransform: 'none',
-                  fontWeight: activePage === item.id ? 700 : 400,
-                  borderBottom: activePage === item.id ? '2px solid currentColor' : '2px solid transparent',
+                  fontWeight: isActive(item.path) ? 700 : 400,
+                  borderBottom: isActive(item.path) ? '2px solid currentColor' : '2px solid transparent',
                   borderRadius: 0,
                   px: 1.5,
                   fontSize: '0.875rem',
@@ -184,9 +186,9 @@ export default function NavBar({
         <List disablePadding>
           {NAV_ITEMS.map((item) => (
             <ListItemButton
-              key={item.id}
-              selected={activePage === item.id}
-              onClick={() => { onNavigate(item.id); onDrawerClose() }}
+              key={item.path}
+              selected={isActive(item.path)}
+              onClick={() => { navigate(item.path); onDrawerClose() }}
               sx={{
                 '&.Mui-selected': { background: 'rgba(255,255,255,0.1)' },
                 '&:hover': { background: 'rgba(255,255,255,0.07)' },

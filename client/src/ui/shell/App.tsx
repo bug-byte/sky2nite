@@ -1,13 +1,16 @@
-import { useState, useRef, useMemo, useEffect } from 'react'
+import { useState, useRef, useMemo, useEffect, useCallback } from 'react'
+import { Routes, Route } from 'react-router-dom'
+import PageTransition from './PageTransition'
 import { useTranslation } from 'react-i18next'
-import { useTheme, useMediaQuery } from '@mui/material'
 import { Box, Container, Typography, Link, Dialog, DialogTitle, DialogContent, DialogContentText } from '@mui/material'
-import NavBar, { type Page } from './navBar/NavBar'
+import NavBar from './navBar/NavBar'
 import ObservationsPage from '../observations/ObservationsPage'
 import SettingsPage from '../settings/SettingsPage'
+import MyObservationsPage from '../myObservations/MyObservationsPage'
 import AuthCard from './auth/AuthCard'
 import { useVisibleObjects, useAvailableTags } from '../../hooks/useVisibleObjects'
-import type { SearchRequest } from 'shared/types'
+import { useSavedObservations, useSaveObservation } from '../../hooks/useSavedObservations'
+import type { SearchRequest, VisibleObject } from 'shared/types'
 import { api, type AuthUser } from '../../services/api'
 import type { LocationInputHandle } from '../observations/locationInput/LocationInput'
 import type { Filters } from '../observations/filterControls/FilterControls'
@@ -34,18 +37,40 @@ function App() {
   const [authLoading, setAuthLoading] = useState(true);
   const [authError, setAuthError] = useState<string | null>(null);
   const [authUser, setAuthUser] = useState<AuthUser | null>(null);
-  const [activePage, setActivePage] = useState<Page>("observations");
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [filtersVisible, setFiltersVisible] = useState(true);
   const { t } = useTranslation();
-  const theme = useTheme();
-  const isDesktop = useMediaQuery(theme.breakpoints.up("md"));
 
   const { data, isLoading, error } = useVisibleObjects(
     searchRequest,
     searchRequest !== null,
   );
   const { data: availableTags = [] } = useAvailableTags(Boolean(authUser));
+  const savedObservationsQuery = useSavedObservations(Boolean(authUser));
+  const savedObservations = savedObservationsQuery.data ?? [];
+  const saveObservation = useSaveObservation();
+
+  const savedLocusIds = useMemo(
+    () => new Set(savedObservations.map((o) => o.locusId)),
+    [savedObservations],
+  );
+
+  const handleSave = useCallback(
+    (object: VisibleObject) => {
+      saveObservation.mutate({
+        locusId: object.locusId,
+        ra: object.ra,
+        dec: object.dec,
+        magnitude: object.magnitude,
+        tags: object.tags,
+        visibilityWindow: object.visibilityWindow,
+        maxAltitude: object.maxAltitude,
+        objectIds: object.objectIds,
+        antaresUrl: object.antaresUrl,
+      });
+    },
+    [saveObservation],
+  );
 
   useEffect(() => {
     let cancelled = false;
@@ -247,8 +272,6 @@ function App() {
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
       <NavBar
-        activePage={activePage}
-        onNavigate={setActivePage}
         drawerOpen={drawerOpen}
         onDrawerOpen={() => setDrawerOpen(true)}
         onDrawerClose={() => setDrawerOpen(false)}
@@ -257,19 +280,10 @@ function App() {
         onAboutOpen={() => setAboutOpen(true)}
       />
 
-      {/* Sliding page container */}
-      <Box sx={{ overflow: 'hidden', flex: 1, display: 'flex', flexDirection: 'column' }}>
-        <Box
-          sx={{
-            display: 'flex',
-            flex: 1,
-            transform: isDesktop && activePage === 'settings' ? 'translateX(-100%)' : 'translateX(0)',
-            transition: isDesktop ? 'transform 0.35s cubic-bezier(0.4, 0, 0.2, 1)' : 'none',
-            willChange: 'transform',
-          }}
-        >
-          {/* Observations page */}
-          <Box sx={{ width: '100%', flexShrink: 0, display: !isDesktop && activePage !== 'observations' ? 'none' : undefined }}>
+      {/* Page content */}
+      <PageTransition>
+        <Routes>
+          <Route path="/" element={
             <ObservationsPage
               locationRef={locationRef}
               filters={filters}
@@ -295,17 +309,24 @@ function App() {
               onPageChange={handlePageChange}
               pageSize={pageSize}
               onPageSizeChange={handlePageSizeChange}
+              savedLocusIds={savedLocusIds}
+              onSave={handleSave}
             />
-          </Box>
-
-          {/* Settings page */}
-          <Box sx={{ width: '100%', flexShrink: 0, display: !isDesktop && activePage !== 'settings' ? 'none' : undefined }}>
+          } />
+          <Route path="/my-observations" element={
+            <MyObservationsPage
+              observations={savedObservations}
+              isLoading={savedObservationsQuery.isLoading}
+              error={savedObservationsQuery.error}
+            />
+          } />
+          <Route path="/settings" element={
             <Container maxWidth="md" sx={{ mt: 4, mb: 4, px: { xs: 2, md: 3 } }}>
               <SettingsPage authUser={authUser} onUserUpdated={(updated) => setAuthUser(updated)} />
             </Container>
-          </Box>
-        </Box>
-      </Box>
+          } />
+        </Routes>
+      </PageTransition>
 
       <Box
         component="footer"

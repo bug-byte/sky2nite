@@ -9,7 +9,10 @@
     "USE_MY_LOCATION": "Ma position",
     "VIEW_DETAILS": "Voir les détails ↗",
     "UPDATE_USERNAME": "Mettre à jour le nom d'utilisateur",
-    "UPDATE_PASSWORD": "Mettre à jour le mot de passe"
+    "UPDATE_PASSWORD": "Mettre à jour le mot de passe",
+    "SAVE_OBSERVATION": "Enregistrer l'observation",
+    "SAVED": "Enregistré",
+    "DELETE": "Supprimer"
   },
   "ERROR": {
     "GEOLOCATION_NOT_SUPPORTED": "La géolocalisation n'est pas prise en charge par votre navigateur",
@@ -68,6 +71,8 @@
     "ZTF_ID": "ID ZTF",
     "NAV_OBSERVATIONS": "Observations de ce soir",
     "NAV_SETTINGS": "Paramètres",
+    "NAV_MY_OBSERVATIONS": "Mes observations",
+    "SAVED_ON": "Enregistré le",
     "RA_TOOLTIP": "Ascension droite — longitude céleste, en degrés (0–360)",
     "DEC_TOOLTIP": "Déclinaison — latitude céleste, en degrés (−90 à +90)",
     "CHANGE_USERNAME": "Modifier le nom d'utilisateur",
@@ -108,6 +113,10 @@
     "CURRENT_USERNAME": "Nom d'utilisateur actuel : {{username}}",
     "CHANGING_PASSWORD_FOR": "Modification du mot de passe pour {{username}}",
     "USERNAME_UPDATED": "Nom d'utilisateur mis à jour avec succès.",
-    "PASSWORD_UPDATED": "Mot de passe mis à jour avec succès."
+    "PASSWORD_UPDATED": "Mot de passe mis à jour avec succès.",
+    "MY_OBSERVATIONS_DESCRIPTION": "Objets célestes que vous avez mis en favoris pour votre session d'observation ce soir.",
+    "NO_SAVED_OBSERVATIONS": "Vous n'avez encore sauvegardé aucune observation. Cliquez sur l'icône de signet sur n'importe quel objet pour l'enregistrer ici.",
+    "OBSERVATIONS_SAVED_one": "{{count}} observation enregistrée",
+    "OBSERVATIONS_SAVED_other": "{{count}} observations enregistrées"
   }
 }

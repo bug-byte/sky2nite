@@ -13,10 +13,12 @@ import {
   TextField,
   MenuItem,
 } from '@mui/material'
-import type { SelectChangeEvent, RefObject } from '@mui/material'
+import type { SelectChangeEvent } from '@mui/material'
+import type { RefObject } from 'react'
 import {
   FilterAltOutlined as FilterAltOutlinedIcon,
   Search as SearchIcon,
+  NightsStay as NightsStayIcon,
 } from '@mui/icons-material'
 import { useTranslation } from 'react-i18next'
 import LocationInput, { type LocationInputHandle } from './locationInput/LocationInput'
@@ -54,6 +56,8 @@ type ObservationsPageProps = {
   onPageChange: (page: number) => void
   pageSize: number
   onPageSizeChange: (size: number) => void
+  savedLocusIds: Set<string>
+  onSave: (object: VisibleObject) => void
 }
 
 export default function ObservationsPage({
@@ -81,6 +85,8 @@ export default function ObservationsPage({
   onPageChange,
   pageSize,
   onPageSizeChange,
+  savedLocusIds,
+  onSave,
 }: ObservationsPageProps) {
   const { t } = useTranslation()
 
@@ -92,7 +98,8 @@ export default function ObservationsPage({
   return (
     <Container maxWidth="xl" sx={{ mt: 4, mb: 4, px: { xs: 2, md: 3 } }}>
       <Box sx={{ mb: 3 }}>
-        <Typography variant="h4" fontWeight={600} gutterBottom>
+        <Typography variant="h4" fontWeight={600} gutterBottom sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+          <NightsStayIcon sx={{ position: 'relative', top: '-0.25em' }} />
           {t('LABEL.NAV_OBSERVATIONS')}
         </Typography>
         <Typography variant="body2" color="text.secondary">
@@ -234,6 +241,8 @@ export default function ObservationsPage({
           onPageSizeChange={onPageSizeChange}
           filtersVisible={filtersVisible}
           onToggleFilters={onToggleFilters}
+          savedLocusIds={savedLocusIds}
+          onSave={onSave}
         />
       )}
     </Container>

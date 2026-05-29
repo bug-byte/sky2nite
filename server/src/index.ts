@@ -7,6 +7,7 @@ import './config/loadEnv.js';
 import { authRouter } from './api/auth/authRouter.js';
 import { requireAuth } from './api/auth/authMiddleware.js';
 import { objectsRouter } from './api/objects/objectsRouter.js';
+import { observationsRouter } from './api/observations/observationsRouter.js';
 import { initDb } from './services/db.js';
 import { initializeDatabaseFromScripts } from './services/dbInitialization.js';
 import getLogger from './util/getLogger.js';
@@ -36,6 +37,7 @@ app.use((req, _res, next) => {
 
 app.use('/api/auth', authRouter);
 app.use('/api/objects', requireAuth, objectsRouter);
+app.use('/api/observations', requireAuth, observationsRouter);
 
 if (process.env.NODE_ENV !== 'production') {
   app.get('/', (_req, res) => {

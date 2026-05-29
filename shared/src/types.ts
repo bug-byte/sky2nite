@@ -106,3 +106,43 @@ export type UpdatePasswordRequest = {
 export type UpdatePasswordResult = {
   success: true;
 }
+
+// Saved observations
+export type SavedObservation = {
+  id: number;
+  userId: number;
+  locusId: string;
+  ra: number;
+  dec: number;
+  magnitude: number;
+  tags: string[];
+  visibilityWindow: VisibilityWindow;
+  maxAltitude: number;
+  objectIds: {
+    ztf?: string;
+    lsst?: string;
+  };
+  antaresUrl: string;
+  notes: string;
+  savedAt: string; // ISO datetime
+}
+
+export type SaveObservationRequest = {
+  locusId: string;
+  ra: number;
+  dec: number;
+  magnitude: number;
+  tags: string[];
+  visibilityWindow: VisibilityWindow;
+  maxAltitude: number;
+  objectIds: {
+    ztf?: string;
+    lsst?: string;
+  };
+  antaresUrl: string;
+  notes?: string;
+}
+
+export type DeleteObservationResult = {
+  success: true;
+}

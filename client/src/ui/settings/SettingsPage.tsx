@@ -11,7 +11,7 @@ import {
   TextField,
   Typography,
 } from '@mui/material'
-import { ManageAccounts as ManageAccountsIcon, Lock as LockIcon } from '@mui/icons-material'
+import { ManageAccounts as ManageAccountsIcon, Lock as LockIcon, Settings as SettingsIcon } from '@mui/icons-material'
 import { useTranslation } from 'react-i18next'
 import { api } from '../../services/api'
 import type { AuthUser } from '../../services/api'
@@ -63,7 +63,7 @@ function ChangeUsernameForm({ authUser, onUserUpdated }: SettingsPageProps) {
       }}
     >
       <Typography variant="h6" sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 0.5 }}>
-        <ManageAccountsIcon fontSize="small" />
+        <ManageAccountsIcon fontSize="small" sx={{ position: 'relative', top: '-0.25em' }} />
         {t('LABEL.CHANGE_USERNAME')}
       </Typography>
       <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
@@ -149,7 +149,7 @@ function ChangePasswordForm({ authUser }: { authUser: AuthUser }) {
       }}
     >
       <Typography variant="h6" sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 0.5 }}>
-        <LockIcon fontSize="small" />
+        <LockIcon fontSize="small" sx={{ position: 'relative', top: '-0.25em' }} />
         {t('LABEL.CHANGE_PASSWORD')}
       </Typography>
       <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
@@ -212,7 +212,8 @@ export default function SettingsPage({ authUser, onUserUpdated }: SettingsPagePr
   return (
     <Stack spacing={3} sx={{ maxWidth: 520, mx: 'auto' }}>
       <Box>
-        <Typography variant="h4" fontWeight={600} gutterBottom>
+        <Typography variant="h4" fontWeight={600} gutterBottom sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+          <SettingsIcon sx={{ position: 'relative', top: '-0.25em' }} />
           {t('LABEL.NAV_SETTINGS')}
         </Typography>
         <Typography variant="body2" color="text.secondary">
