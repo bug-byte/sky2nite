@@ -11,4 +11,3 @@ Major Features
 Bugs / Investigation
 
 - Re-test windows setup script
-- Include an autostart service (systemd/systemctl for linux)
