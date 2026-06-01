@@ -57,24 +57,59 @@ if command -v psql >/dev/null 2>&1; then
       fi
     fi
   fi
+elif command -v docker >/dev/null 2>&1; then
+  # No local psql — try to spin up a Postgres container if one isn't already running
+  if docker inspect sky2nite-db >/dev/null 2>&1; then
+    ok "Docker container 'sky2nite-db' already exists ✓"
+  else
+    info "psql not found — starting a PostgreSQL Docker container..."
+    docker run -d \
+      --name sky2nite-db \
+      -e POSTGRES_DB=sky2nite \
+      -e POSTGRES_USER=sky2nite \
+      -e POSTGRES_PASSWORD=sky2nite \
+      -p 5432:5432 \
+      --restart unless-stopped \
+      postgres:17-alpine >/dev/null \
+    && ok "Docker container 'sky2nite-db' started on port 5432 ✓" \
+    || warn "Failed to start Docker container — start PostgreSQL manually and update server/.env."
+  fi
 else
-  warn "psql not found — skipping automatic database setup."
-  warn "Install PostgreSQL, then create the database: createdb sky2nite"
-  warn "Update DATABASE_URL in server/.env before starting the server."
+  warn "Neither psql nor Docker found — start PostgreSQL manually and update DATABASE_URL in server/.env."
+  warn "Quickstart with Docker:  docker run -d --name sky2nite-db -e POSTGRES_DB=sky2nite -e POSTGRES_USER=sky2nite -e POSTGRES_PASSWORD=sky2nite -p 5432:5432 postgres:17-alpine"
 fi
+
+# ─── Google Maps API key ─────────────────────────────────────────────────────
+_gmk=$(grep '^VITE_GOOGLE_MAPS_API_KEY=' server/.env 2>/dev/null | cut -d= -f2- || true)
+if [ -z "$_gmk" ] || [ "$_gmk" = "your_api_key_here" ]; then
+  echo
+  echo -e "${BOLD}Google Maps API key${RESET} (optional — enables address lookup)"
+  echo    "  Get one free at https://console.cloud.google.com/"
+  printf  "  Enter key or press Enter to skip: "
+  read -r _gmk_input </dev/tty
+  if [ -n "$_gmk_input" ]; then
+    # Write/replace the key in server/.env
+    if grep -q '^VITE_GOOGLE_MAPS_API_KEY=' server/.env 2>/dev/null; then
+      sed -i "s|^VITE_GOOGLE_MAPS_API_KEY=.*|VITE_GOOGLE_MAPS_API_KEY=${_gmk_input}|" server/.env
+    else
+      echo "VITE_GOOGLE_MAPS_API_KEY=${_gmk_input}" >> server/.env
+    fi
+    _gmk="$_gmk_input"
+    ok "Google Maps API key saved to server/.env ✓"
+  else
+    warn "Skipped — address autocomplete will be unavailable."
+  fi
+else
+  ok "Google Maps API key loaded from server/.env ✓"
+fi
+echo
+
+# Export so Vite bakes it into the client bundle
+[ -n "$_gmk" ] && [ "$_gmk" != "your_api_key_here" ] && export VITE_GOOGLE_MAPS_API_KEY="$_gmk"
 
 # ─── Client ───────────────────────────────────────────────────────────────────
 info "Installing client dependencies..."
 npm ci --prefix client
-
-# Export VITE vars from server/.env so Vite bakes them into the client bundle
-_gmk=$(grep '^VITE_GOOGLE_MAPS_API_KEY=' server/.env 2>/dev/null | cut -d= -f2- || true)
-if [ -n "$_gmk" ] && [ "$_gmk" != "your_api_key_here" ]; then
-  export VITE_GOOGLE_MAPS_API_KEY="$_gmk"
-  ok "Google Maps API key loaded from server/.env ✓"
-else
-  warn "VITE_GOOGLE_MAPS_API_KEY not set in server/.env — address autocomplete will be unavailable."
-fi
 
 info "Building client..."
 npm run build --prefix client
@@ -91,10 +126,57 @@ info "Copying client build into server/public..."
 rm -rf server/public
 cp -r client/dist server/public
 
+# ─── Systemd service (Linux only) ────────────────────────────────────────────
+if command -v systemctl >/dev/null 2>&1; then
+  NODE_BIN="$(command -v node)"
+  APP_DIR="$SCRIPT_DIR/server"
+  ENV_FILE="$SCRIPT_DIR/server/.env"
+  SERVICE_NAME="sky2nite"
+  SERVICE_FILE="/etc/systemd/system/${SERVICE_NAME}.service"
+
+  info "Installing systemd service '${SERVICE_NAME}'..."
+
+  # Stop existing service if running so we can overwrite the unit file
+  if systemctl is-active --quiet "$SERVICE_NAME" 2>/dev/null; then
+    sudo systemctl stop "$SERVICE_NAME"
+  fi
+
+  sudo tee "$SERVICE_FILE" > /dev/null << UNIT
+[Unit]
+Description=sky2nite astronomy app
+After=network.target postgresql.service
+Wants=postgresql.service
+
+[Service]
+Type=simple
+User=$(whoami)
+WorkingDirectory=${APP_DIR}
+EnvironmentFile=${ENV_FILE}
+Environment=NODE_ENV=production
+ExecStart=${NODE_BIN} dist/index.js
+Restart=on-failure
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target
+UNIT
+
+  sudo systemctl daemon-reload
+  sudo systemctl enable "$SERVICE_NAME"
+  sudo systemctl restart "$SERVICE_NAME"
+
+  ok "Service '${SERVICE_NAME}' installed and started ✓"
+  echo
+  echo -e "  ${BOLD}Manage the service:${RESET}"
+  echo "    sudo systemctl start   sky2nite"
+  echo "    sudo systemctl stop    sky2nite"
+  echo "    sudo systemctl restart sky2nite"
+  echo "    sudo systemctl status  sky2nite"
+  echo "    journalctl -u sky2nite -f   # live logs"
+else
+  echo -e "  ${BOLD}Start the application:${RESET}"
+  echo "    cd server && NODE_ENV=production node dist/index.js"
+fi
+
 # ─── Done ─────────────────────────────────────────────────────────────────────
-ok "Setup complete!"
-echo
-echo -e "  ${BOLD}Start the application:${RESET}"
-echo "    cd server && NODE_ENV=production node dist/index.js"
-echo
-echo "  The app will be available at http://localhost:3000"
+ok "Setup complete! The app will be available at http://localhost:3000"

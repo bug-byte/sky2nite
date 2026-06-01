@@ -25,7 +25,7 @@ type SettingsPageProps = {
   onParticlesToggle: (enabled: boolean) => Promise<void>
 }
 
-function ChangeUsernameForm({ authUser, onUserUpdated }: SettingsPageProps) {
+function ChangeUsernameForm({ authUser, onUserUpdated }: Pick<SettingsPageProps, 'authUser' | 'onUserUpdated'>) {
   const { t } = useTranslation()
   const [newUsername, setNewUsername] = useState('')
   const [loading, setLoading] = useState(false)

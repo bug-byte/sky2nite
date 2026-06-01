@@ -118,7 +118,7 @@
     "CHANGING_PASSWORD_FOR": "Changing password for {{username}}",
     "USERNAME_UPDATED": "Username updated successfully.",
     "PASSWORD_UPDATED": "Password updated successfully.",
-    "MY_OBSERVATIONS_DESCRIPTION": "Celestial objects you've bookmarked for tonight's viewing session.",
+    "MY_OBSERVATIONS_DESCRIPTION": "Celestial objects you've saved across all your viewing sessions.",
     "NO_SAVED_OBSERVATIONS": "You haven't saved any observations yet. Click the bookmark icon on any object to save it here.",
     "OBSERVATIONS_SAVED_one": "{{count}} Saved Observation",
     "OBSERVATIONS_SAVED_other": "{{count}} Saved Observations"

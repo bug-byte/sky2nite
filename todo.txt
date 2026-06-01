@@ -10,5 +10,5 @@ Major Features
 
 Bugs / Investigation
 
-- Re-test all setup methods now that we have a db connection
-- Confirm antares caching implementation makes sense
+- Re-test windows setup script
+- Include an autostart service (systemd/systemctl for linux)

@@ -118,7 +118,7 @@
     "CHANGING_PASSWORD_FOR": "Modification du mot de passe pour {{username}}",
     "USERNAME_UPDATED": "Nom d'utilisateur mis à jour avec succès.",
     "PASSWORD_UPDATED": "Mot de passe mis à jour avec succès.",
-    "MY_OBSERVATIONS_DESCRIPTION": "Objets célestes que vous avez mis en favoris pour votre session d'observation ce soir.",
+    "MY_OBSERVATIONS_DESCRIPTION": "Objets célestes que vous avez enregistrés lors de toutes vos sessions d'observation.",
     "NO_SAVED_OBSERVATIONS": "Vous n'avez encore sauvegardé aucune observation. Cliquez sur l'icône de signet sur n'importe quel objet pour l'enregistrer ici.",
     "OBSERVATIONS_SAVED_one": "{{count}} observation enregistrée",
     "OBSERVATIONS_SAVED_other": "{{count}} observations enregistrées"

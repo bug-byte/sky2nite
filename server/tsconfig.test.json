@@ -14,5 +14,6 @@
     },
     "types": []
   },
-  "include": ["src/**/*"]
+  "include": ["src/**/*.itest.ts", "src/test/**/*"],
+  "files": ["src/test/jestOverrides.d.ts"]
 }

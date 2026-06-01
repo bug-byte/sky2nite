@@ -274,12 +274,15 @@ function App() {
 
   if (!authUser) {
     return (
-      <AuthCard
-        mode={authMode}
-        loading={authLoading}
-        error={authError}
-        onSubmit={handleAuthenticate}
-      />
+      <>
+        {particlesEnabled && <StarField />}
+        <AuthCard
+          mode={authMode}
+          loading={authLoading}
+          error={authError}
+          onSubmit={handleAuthenticate}
+        />
+      </>
     );
   }
 

@@ -4,22 +4,19 @@
     "module": "ES2022",
     "lib": ["ES2022"],
     "moduleResolution": "bundler",
-    "outDir": "./dist",
-    "rootDir": "./src",
     "strict": true,
     "esModuleInterop": true,
     "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true,
     "resolveJsonModule": true,
-    "declaration": true,
-    "declarationMap": true,
-    "sourceMap": true,
+    "noEmit": true,
     "baseUrl": ".",
     "paths": {
       "shared/*": ["../shared/dist/*"]
     }
   },
   "references": [{ "path": "../shared" }],
+  "files": ["src/test/jestOverrides.d.ts"],
   "include": ["src/**/*"],
-  "exclude": ["node_modules", "dist", "src/**/*.itest.ts", "src/test/**"]
+  "exclude": ["node_modules", "dist"]
 }
