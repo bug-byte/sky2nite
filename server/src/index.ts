@@ -1,6 +1,8 @@
 import { randomUUID } from 'crypto';
 import cors from 'cors';
 import express from 'express';
+import helmet from 'helmet';
+import { rateLimit } from 'express-rate-limit';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import './config/loadEnv.js';
@@ -20,12 +22,28 @@ const log = getLogger('SERVER');
 const app = express();
 const PORT = process.env.PORT || 3000;
 
+// Security headers
+app.use(helmet());
+
+// CORS — in production, only allow the explicitly configured frontend origin.
+// If FRONTEND_URL is unset, fall back to same-origin only (no cross-origin access).
+const corsOrigin = process.env.NODE_ENV === 'production'
+  ? (process.env.FRONTEND_URL || false)
+  : ['http://localhost:5173', 'http://127.0.0.1:5173'];
+
 app.use(cors({
-  origin: process.env.NODE_ENV === 'production'
-    ? process.env.FRONTEND_URL
-    : ['http://localhost:5173', 'http://127.0.0.1:5173'],
+  origin: corsOrigin,
   credentials: true,
 }));
+
+// Rate limiting on auth endpoints — 20 requests per minute per IP
+const authLimiter = rateLimit({
+  windowMs: 60 * 1000,
+  max: 20,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { err: 'Too many requests, please try again later.' },
+});
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
@@ -36,7 +54,7 @@ app.use((req, _res, next) => {
   next();
 });
 
-app.use('/api/auth', authRouter);
+app.use('/api/auth', authLimiter, authRouter);
 app.use('/api/objects', requireAuth, objectsRouter);
 app.use('/api/observations', requireAuth, observationsRouter);
 app.use('/api/settings', requireAuth, settingsRouter);
@@ -57,7 +75,8 @@ if (process.env.NODE_ENV === 'production') {
 
 app.use((err: Error, _req: express.Request, res: express.Response, _next: express.NextFunction) => {
   log.error('Unhandled error:', err.message);
-  res.status(500).json({ err: err.message });
+  const message = process.env.NODE_ENV === 'production' ? 'An unexpected error occurred.' : err.message;
+  res.status(500).json({ err: message });
 });
 
 async function startServer(): Promise<void> {
