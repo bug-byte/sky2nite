@@ -23,7 +23,14 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 
 // Security headers
-app.use(helmet());
+app.use(helmet({
+  contentSecurityPolicy: {
+    directives: {
+      ...helmet.contentSecurityPolicy.getDefaultDirectives(),
+      'img-src': ["'self'", 'data:', 'https://alasky.cds.unistra.fr'],
+    },
+  },
+}));
 
 // CORS — in production, only allow the explicitly configured frontend origin.
 // If FRONTEND_URL is unset, fall back to same-origin only (no cross-origin access).
