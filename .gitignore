@@ -20,6 +20,7 @@ client/.env
 # Server
 server/node_modules
 server/dist
+server/public
 server/.env
 
 # Editor directories and files
