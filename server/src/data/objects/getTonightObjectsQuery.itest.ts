@@ -2,11 +2,12 @@ import { jest, describe, it, expect, beforeEach } from '@jest/globals';
 import type { SearchRequest } from 'shared/types.js';
 
 const mockFetchLoci = jest.fn();
+const mockFetchAlertActivityCurve = jest.fn();
 const mockNightWindow = jest.fn();
 const mockVisibility = jest.fn();
 
 jest.unstable_mockModule('../../services/antaresApi.js', () => ({
-  antaresApi: { fetchLociAtOffset: mockFetchLoci },
+  antaresApi: { fetchLociAtOffset: mockFetchLoci, fetchAlertActivityCurve: mockFetchAlertActivityCurve },
 }));
 jest.unstable_mockModule('../../util/astronomy.js', () => ({
   calculateNightWindow: mockNightWindow,
@@ -34,7 +35,7 @@ const BASE_REQUEST: SearchRequest = {
   date: '2025-01-01',
 };
 
-function makeLocus(id: string, mag: number, tags: string[] = [], ra = 180, dec = 0) {
+function makeLocus(id: string, mag: number, tags: string[] = [], ra = 180, dec = 0, numAlerts = 5) {
   return {
     locus_id: id,
     ra,
@@ -42,6 +43,7 @@ function makeLocus(id: string, mag: number, tags: string[] = [], ra = 180, dec =
     tags,
     properties: {
       brightest_alert_magnitude: mag,
+      num_alerts: numAlerts,
       ztf_object_id: `ZTF_${id}`,
     },
   };
@@ -140,6 +142,24 @@ describe('getTonightObjectsQuery', () => {
     expect(result.objects[0].antaresUrl).toContain('L1');
   });
 
+  it('attaches an alert activity curve when requested', async () => {
+    mockFetchLoci.mockResolvedValueOnce({
+      loci: [makeLocus('L1', 12.0, [], 180, 0, 5)],
+      antaresTotalLoci: 1,
+      hasNextPage: false,
+    });
+    mockVisibility.mockReturnValueOnce(VISIBLE);
+    mockFetchAlertActivityCurve.mockResolvedValueOnce([1, 2, 1]);
+
+    const result = await getTonightObjectsQuery({
+      ...BASE_REQUEST,
+      includeAlertActivity: true,
+    });
+
+    expect(mockFetchAlertActivityCurve).toHaveBeenCalledWith('L1', 5);
+    expect(result.objects[0].alertActivityCurve).toEqual([1, 2, 1]);
+  });
+
   // --- Magnitude filter ---
 
   it('excludes objects above the default magnitude threshold (14)', async () => {
@@ -169,6 +189,24 @@ describe('getTonightObjectsQuery', () => {
 
     expect(result.objects).toHaveLength(1);
     expect(result.objects[0].locusId).toBe('L1');
+  });
+
+  it('filters out objects below the minimum alert count', async () => {
+    mockFetchLoci.mockResolvedValueOnce({
+      loci: [makeLocus('L1', 12.0, [], 180, 0, 3), makeLocus('L2', 12.0, [], 180, 0, 1)],
+      antaresTotalLoci: 2,
+      hasNextPage: false,
+    });
+    mockVisibility.mockReturnValue(VISIBLE);
+
+    const result = await getTonightObjectsQuery({
+      ...BASE_REQUEST,
+      filters: { minAlerts: 2 },
+    });
+
+    expect(result.objects).toHaveLength(1);
+    expect(result.objects[0].locusId).toBe('L1');
+    expect(result.objects[0].numAlerts).toBe(3);
   });
 
   // --- Visibility filter ---

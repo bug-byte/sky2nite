@@ -1,6 +1,7 @@
 import axios from 'axios';
 import type { SearchRequest, SearchResponse, SavedObservation, SaveObservationRequest } from 'shared/types';
 import type { AuthUser } from 'shared/types';
+import type { UserSettings } from 'shared/types';
 export type { AuthUser };
 
 const API_BASE_URL = import.meta.env.VITE_API_URL || '/api';
@@ -113,6 +114,13 @@ export const api = {
     return requestEnvelope(apiClient.post<ApiEnvelope<SearchResponse>>('/objects/tonight', request));
   },
 
+  getAlertActivityCurves: async (locusIds: string[]): Promise<Record<string, number[]>> => {
+    const result = await requestEnvelope(
+      apiClient.post<ApiEnvelope<{ curves: Record<string, number[]> }>>('/objects/alert-activity', { locusIds }),
+    );
+    return result.curves;
+  },
+
   // Get available ANTARES tags for filtering
   getAvailableTags: async (): Promise<string[]> => {
     return requestEnvelope(apiClient.get<ApiEnvelope<string[]>>('/objects/tags'));
@@ -137,12 +145,12 @@ export const api = {
   },
 
   // User settings
-  getSettings: async (): Promise<{ particlesEnabled: boolean }> => {
-    return requestEnvelope(apiClient.get<ApiEnvelope<{ particlesEnabled: boolean }>>('/settings'));
+  getSettings: async (): Promise<UserSettings> => {
+    return requestEnvelope(apiClient.get<ApiEnvelope<UserSettings>>('/settings'));
   },
 
-  updateSettings: async (patch: { particlesEnabled?: boolean }): Promise<{ particlesEnabled: boolean }> => {
-    return requestEnvelope(apiClient.patch<ApiEnvelope<{ particlesEnabled: boolean }>>('/settings', patch));
+  updateSettings: async (patch: Partial<UserSettings>): Promise<UserSettings> => {
+    return requestEnvelope(apiClient.patch<ApiEnvelope<UserSettings>>('/settings', patch));
   },
 };
 

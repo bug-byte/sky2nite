@@ -15,6 +15,7 @@ import { useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useDeleteObservation } from '../../hooks/useSavedObservations'
 import type { SavedObservation } from 'shared/types'
+import type { RareClassificationSettings } from 'shared/types'
 import ObjectsDataTable from '../shared/ObjectsDataTable'
 
 function formatDate(isoString: string) {
@@ -29,9 +30,10 @@ type MyObservationsPageProps = {
   observations: SavedObservation[]
   isLoading: boolean
   error: Error | null
+  rareClassificationSettings: RareClassificationSettings
 }
 
-export default function MyObservationsPage({ observations, isLoading, error }: MyObservationsPageProps) {
+export default function MyObservationsPage({ observations, isLoading, error, rareClassificationSettings }: MyObservationsPageProps) {
   const { t } = useTranslation()
   const deleteObservation = useDeleteObservation()
 
@@ -43,10 +45,11 @@ export default function MyObservationsPage({ observations, isLoading, error }: M
       sortable: true,
       width: '130px',
       cell: (row) => (
-        <Typography variant="body2" color="text.secondary">
+        <Typography variant="body2" color="text.secondary" sx={{ width: '100%', textAlign: 'center' }}>
           {formatDate(row.savedAt)}
         </Typography>
       ),
+      center: true,
     }),
     [t],
   )
@@ -56,20 +59,23 @@ export default function MyObservationsPage({ observations, isLoading, error }: M
       id: 'delete',
       name: '',
       cell: (row) => (
-        <Tooltip title={t('COMMAND.DELETE')} placement="top">
-          <IconButton
-            size="small"
-            onClick={() => deleteObservation.mutate(row.id)}
-            disabled={deleteObservation.isPending}
-            aria-label={t('COMMAND.DELETE')}
-            sx={{ color: 'error.main' }}
-          >
-            <DeleteIcon fontSize="small" />
-          </IconButton>
-        </Tooltip>
+        <Box sx={{ display: 'flex', justifyContent: 'center', width: '100%' }}>
+          <Tooltip title={t('COMMAND.DELETE')} placement="top">
+            <IconButton
+              size="small"
+              onClick={() => deleteObservation.mutate(row.id)}
+              disabled={deleteObservation.isPending}
+              aria-label={t('COMMAND.DELETE')}
+              sx={{ color: 'error.main' }}
+            >
+              <DeleteIcon fontSize="small" />
+            </IconButton>
+          </Tooltip>
+        </Box>
       ),
       width: '56px',
       button: true,
+      center: true,
     }),
     [t, deleteObservation],
   )
@@ -100,6 +106,7 @@ export default function MyObservationsPage({ observations, isLoading, error }: M
         data={observations}
         keyField="id"
         isLoading={isLoading}
+        rareClassificationSettings={rareClassificationSettings}
         title={
           isLoading
             ? t('MESSAGE.SEARCHING')

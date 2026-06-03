@@ -20,7 +20,9 @@ import {
 import { useMemo } from "react";
 import { useTranslation } from "react-i18next";
 import type { VisibleObject } from 'shared/types';
+import type { RareClassificationSettings } from 'shared/types';
 import ObjectsDataTable from '../../shared/ObjectsDataTable';
+import { useAlertActivityCurves } from '../../../hooks/useVisibleObjects';
 
 type ObjectsListProps = {
   objects: VisibleObject[];
@@ -40,9 +42,10 @@ type ObjectsListProps = {
   onToggleFilters: () => void;
   savedLocusIds: Set<string>;
   onSave: (object: VisibleObject) => void;
-}
+  rareClassificationSettings: RareClassificationSettings;
+};
 
-export default function ObjectsList({
+export function ObjectsList({
   objects,
   loading,
   error,
@@ -55,6 +58,7 @@ export default function ObjectsList({
   onToggleFilters,
   savedLocusIds,
   onSave,
+  rareClassificationSettings,
 }: ObjectsListProps) {
   const { t } = useTranslation();
 
@@ -65,24 +69,33 @@ export default function ObjectsList({
       cell: (row) => {
         const saved = savedLocusIds.has(row.locusId);
         return (
-          <Tooltip title={saved ? t("COMMAND.SAVED") : t("COMMAND.SAVE_OBSERVATION")} placement="top">
-            <IconButton
-              size="small"
-              onClick={() => onSave(row)}
-              disabled={saved}
-              aria-label={saved ? t("COMMAND.SAVED") : t("COMMAND.SAVE_OBSERVATION")}
-              sx={{ color: saved ? "primary.main" : "text.secondary" }}
-            >
-              {saved ? <BookmarkAddedIcon fontSize="small" /> : <BookmarkAddIcon fontSize="small" />}
-            </IconButton>
-          </Tooltip>
+          <Box sx={{ display: 'flex', justifyContent: 'center', width: '100%' }}>
+            <Tooltip title={saved ? t("COMMAND.SAVED") : t("COMMAND.SAVE_OBSERVATION")} placement="top">
+              <IconButton
+                size="small"
+                onClick={() => onSave(row)}
+                disabled={saved}
+                aria-label={saved ? t("COMMAND.SAVED") : t("COMMAND.SAVE_OBSERVATION")}
+                sx={{ color: saved ? "primary.main" : "text.secondary" }}
+              >
+                {saved ? <BookmarkAddedIcon fontSize="small" /> : <BookmarkAddIcon fontSize="small" />}
+              </IconButton>
+            </Tooltip>
+          </Box>
         );
       },
       width: "56px",
       button: true,
+      center: true,
     }),
     [t, savedLocusIds, onSave],
   );
+
+  const visibleLocusIds = useMemo(
+    () => objects.map((object) => object.locusId),
+    [objects],
+  );
+  const alertActivityCurvesQuery = useAlertActivityCurves(visibleLocusIds, objects.length > 0);
 
   // Synthesise a paginationTotalRows that keeps DataTable's "Next" button in sync
   // with our cursor-based server pagination. We can't know the true visible-object
@@ -164,6 +177,10 @@ export default function ObjectsList({
       data={objects}
       keyField="locusId"
       isLoading={loading}
+      alertActivityCurvesByLocusId={alertActivityCurvesQuery.data ?? {}}
+      alertActivityCurvesLoading={alertActivityCurvesQuery.isFetching}
+      rareClassificationSettings={rareClassificationSettings}
+      showAlertActivity
       title={
         loading
           ? t("MESSAGE.SEARCHING")

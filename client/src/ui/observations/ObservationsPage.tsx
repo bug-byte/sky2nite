@@ -23,8 +23,9 @@ import {
 import { useTranslation } from 'react-i18next'
 import LocationInput, { type LocationInputHandle } from './locationInput/LocationInput'
 import FilterControls, { type Filters } from './filterControls/FilterControls'
-import ObjectsList from './objectsList/ObjectsList'
+import { ObjectsList } from './objectsList/ObjectsList'
 import type { SearchRequest, VisibleObject } from 'shared/types'
+import type { RareClassificationSettings } from 'shared/types'
 
 type ObservationsPageProps = {
   locationRef: RefObject<LocationInputHandle | null>
@@ -58,6 +59,7 @@ type ObservationsPageProps = {
   onPageSizeChange: (size: number) => void
   savedLocusIds: Set<string>
   onSave: (object: VisibleObject) => void
+  rareClassificationSettings: RareClassificationSettings
 }
 
 export default function ObservationsPage({
@@ -87,6 +89,7 @@ export default function ObservationsPage({
   onPageSizeChange,
   savedLocusIds,
   onSave,
+  rareClassificationSettings,
 }: ObservationsPageProps) {
   const { t } = useTranslation()
 
@@ -122,11 +125,17 @@ export default function ObservationsPage({
               ref={locationRef}
               onLocationChange={onLocationChange}
               onLoadingChange={onLocationLoadingChange}
-              locationRequired={!locusIdFilter.trim()}
             />
           </Box>
           <Box sx={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column' }}>
-            <FilterControls filters={filters} onFiltersChange={onFiltersChange} />
+            <FilterControls
+              filters={filters}
+              onFiltersChange={onFiltersChange}
+              visibilityStart={visibilityStart}
+              onVisibilityStartChange={onVisibilityStartChange}
+              visibilityEnd={visibilityEnd}
+              onVisibilityEndChange={onVisibilityEndChange}
+            />
           </Box>
           <Box sx={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column' }}>
             <Paper
@@ -171,32 +180,23 @@ export default function ObservationsPage({
                 </Typography>
               </FormControl>
               <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5, mt: 2 }}>
-                <Box sx={{ display: 'flex', gap: 1 }}>
-                  <Box sx={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 0.5 }}>
-                    <Typography variant="caption" color="text.secondary">
-                      {t('LABEL.VISIBILITY_FROM')}
-                    </Typography>
-                    <TextField
-                      type="time"
-                      value={visibilityStart}
-                      onChange={(e) => onVisibilityStartChange(e.target.value)}
-                      size="small"
-                      fullWidth
-                    />
-                  </Box>
-                  <Box sx={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 0.5 }}>
-                    <Typography variant="caption" color="text.secondary">
-                      {t('LABEL.VISIBILITY_TO')}
-                    </Typography>
-                    <TextField
-                      type="time"
-                      value={visibilityEnd}
-                      onChange={(e) => onVisibilityEndChange(e.target.value)}
-                      size="small"
-                      fullWidth
-                    />
-                  </Box>
-                </Box>
+                <TextField
+                  label={t('LABEL.MIN_ALERTS')}
+                  type="number"
+                  value={filters.minAlerts}
+                  onChange={(e) =>
+                    onFiltersChange({
+                      ...filters,
+                      minAlerts: Math.max(0, Number.parseInt(e.target.value || '0', 10) || 0),
+                    })
+                  }
+                  inputProps={{ min: 0, step: 1 }}
+                  size="small"
+                  fullWidth
+                />
+                <Typography variant="caption" color="text.secondary" sx={{ mt: -0.75 }}>
+                  {t('MESSAGE.MIN_ALERTS_HELP')}
+                </Typography>
                 <TextField
                   label={t('LABEL.LOCUS_ID_SEARCH')}
                   placeholder={t('LABEL.LOCUS_ID_SEARCH_PLACEHOLDER')}
@@ -205,6 +205,9 @@ export default function ObservationsPage({
                   size="small"
                   fullWidth
                 />
+                <Typography variant="caption" color="text.secondary" sx={{ mt: -0.75 }}>
+                  {t('MESSAGE.LOCUS_ID_SEARCH_HELP')}
+                </Typography>
                 {locusIdFilter.trim() && !searchRequest && (
                   <Typography variant="caption" color="text.secondary" sx={{ mt: 0.5 }}>
                     {t('MESSAGE.NAME_FILTER_NEEDS_LOCATION')}
@@ -243,6 +246,7 @@ export default function ObservationsPage({
           onToggleFilters={onToggleFilters}
           savedLocusIds={savedLocusIds}
           onSave={onSave}
+          rareClassificationSettings={rareClassificationSettings}
         />
       )}
     </Container>

@@ -15,6 +15,8 @@ import type { SearchRequest, VisibleObject } from 'shared/types'
 import { api, type AuthUser } from '../../services/api'
 import type { LocationInputHandle } from '../observations/locationInput/LocationInput'
 import type { Filters } from '../observations/filterControls/FilterControls'
+import { DEFAULT_USER_SETTINGS } from 'shared/userSettings'
+import type { RareClassificationSettings } from 'shared/types'
 
 function App() {
   const [searchRequest, setSearchRequest] = useState<SearchRequest | null>(
@@ -28,6 +30,7 @@ function App() {
     maxMagnitude: 14,
     objectTypes: [],
     minAltitude: 15,
+    minAlerts: 5,
   });
   const [locusIdFilter, setLocusIdFilter] = useState("");
   const [visibilityStart, setVisibilityStart] = useState("");
@@ -41,6 +44,7 @@ function App() {
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [filtersVisible, setFiltersVisible] = useState(true);
   const [particlesEnabled, setParticlesEnabled] = useState(true);
+  const [rareClassificationSettings, setRareClassificationSettings] = useState<RareClassificationSettings>(DEFAULT_USER_SETTINGS.rareClassifications);
 
   // Sync body class so the CSS fallback background activates when particles are off
   useEffect(() => {
@@ -103,6 +107,7 @@ function App() {
             try {
               const settings = await api.getSettings();
               if (!cancelled) setParticlesEnabled(settings.particlesEnabled);
+              if (!cancelled) setRareClassificationSettings(settings.rareClassifications);
             } catch {
               // settings fetch failing is non-fatal; keep default (true)
             }
@@ -156,6 +161,12 @@ function App() {
     setSearchRequest(null);
     setPage(1);
     setCursors([0]);
+  };
+
+  const handleSettingsChange = async (patch: Partial<{ particlesEnabled: boolean; rareClassifications: RareClassificationSettings }>) => {
+    const updated = await api.updateSettings(patch);
+    setParticlesEnabled(updated.particlesEnabled);
+    setRareClassificationSettings(updated.rareClassifications);
   };
 
   const filteredObjects = useMemo(() => {
@@ -228,6 +239,7 @@ function App() {
         maxMagnitude: filters.maxMagnitude,
         objectTypes: filters.objectTypes,
         minAltitude: filters.minAltitude,
+          minAlerts: filters.minAlerts,
       },
       pagination: { cursor: 0, pageSize },
     });
@@ -246,6 +258,7 @@ function App() {
           maxMagnitude: newFilters.maxMagnitude,
           objectTypes: newFilters.objectTypes,
           minAltitude: newFilters.minAltitude,
+          minAlerts: newFilters.minAlerts,
         },
         pagination: { cursor: 0, pageSize },
       });
@@ -329,6 +342,7 @@ function App() {
               onPageSizeChange={handlePageSizeChange}
               savedLocusIds={savedLocusIds}
               onSave={handleSave}
+              rareClassificationSettings={rareClassificationSettings}
             />
           } />
           <Route path="/my-observations" element={
@@ -336,17 +350,22 @@ function App() {
               observations={savedObservations}
               isLoading={savedObservationsQuery.isLoading}
               error={savedObservationsQuery.error}
+              rareClassificationSettings={rareClassificationSettings}
             />
           } />
           <Route path="/settings" element={
-            <Container maxWidth="md" sx={{ mt: 4, mb: 4, px: { xs: 2, md: 3 } }}>
+            <Container maxWidth="lg" sx={{ mt: 4, mb: 4, px: { xs: 2, md: 3 } }}>
               <SettingsPage
                 authUser={authUser}
                 onUserUpdated={(updated) => setAuthUser(updated)}
+                availableTags={availableTags}
+                rareClassificationSettings={rareClassificationSettings}
+                onRareClassificationSettingsChange={async (settings) => {
+                  await handleSettingsChange({ rareClassifications: settings });
+                }}
                 particlesEnabled={particlesEnabled}
                 onParticlesToggle={async (enabled) => {
-                  setParticlesEnabled(enabled);
-                  await api.updateSettings({ particlesEnabled: enabled });
+                  await handleSettingsChange({ particlesEnabled: enabled });
                 }}
               />
             </Container>

@@ -24,7 +24,6 @@ import {
 type LocationInputProps = {
   onLocationChange: (latitude: number, longitude: number) => void;
   onLoadingChange?: (loading: boolean) => void;
-  locationRequired?: boolean;
 }
 
 export type LocationInputHandle = {
@@ -35,9 +34,11 @@ export type LocationInputHandle = {
 // Get Google API key from environment or use a placeholder
 const GOOGLE_API_KEY = import.meta.env.VITE_GOOGLE_MAPS_API_KEY || "";
 
+const DECIMAL_COORDINATE_PATTERN = /^-?(?:\d+\.?\d*|\d*\.\d+)$/;
+
 const LocationInput = forwardRef<LocationInputHandle, LocationInputProps>(
   function LocationInput(
-    { onLocationChange, onLoadingChange, locationRequired = true },
+    { onLocationChange, onLoadingChange },
     ref,
   ) {
     const [latitude, setLatitude] = useState<string>("");
@@ -128,16 +129,44 @@ const LocationInput = forwardRef<LocationInputHandle, LocationInputProps>(
     };
 
     const handleManualSubmit = () => {
-      const lat = parseFloat(latitude);
-      const lon = parseFloat(longitude);
+      const trimmedLatitude = latitude.trim();
+      const trimmedLongitude = longitude.trim();
 
-      if (isNaN(lat) || lat < -90 || lat > 90) {
-        if (locationRequired) setError(t("ERROR.INVALID_LATITUDE"));
+      if (!trimmedLatitude && !trimmedLongitude) {
+        setError("");
         return;
       }
 
-      if (isNaN(lon) || lon < -180 || lon > 180) {
-        if (locationRequired) setError(t("ERROR.INVALID_LONGITUDE"));
+      if (!trimmedLatitude) {
+        setError(t("ERROR.INVALID_LATITUDE_FORMAT"));
+        return;
+      }
+
+      if (!trimmedLongitude) {
+        setError(t("ERROR.INVALID_LONGITUDE_FORMAT"));
+        return;
+      }
+
+      if (!DECIMAL_COORDINATE_PATTERN.test(trimmedLatitude)) {
+        setError(t("ERROR.INVALID_LATITUDE_FORMAT"));
+        return;
+      }
+
+      if (!DECIMAL_COORDINATE_PATTERN.test(trimmedLongitude)) {
+        setError(t("ERROR.INVALID_LONGITUDE_FORMAT"));
+        return;
+      }
+
+      const lat = Number.parseFloat(trimmedLatitude);
+      const lon = Number.parseFloat(trimmedLongitude);
+
+      if (!Number.isFinite(lat) || lat < -90 || lat > 90) {
+        setError(t("ERROR.INVALID_LATITUDE"));
+        return;
+      }
+
+      if (!Number.isFinite(lon) || lon < -180 || lon > 180) {
+        setError(t("ERROR.INVALID_LONGITUDE"));
         return;
       }
 
@@ -209,8 +238,8 @@ const LocationInput = forwardRef<LocationInputHandle, LocationInputProps>(
               onChange={(e) => setLatitude(e.target.value)}
               placeholder={t("LABEL.LATITUDE_PLACEHOLDER")}
               fullWidth
-              type="number"
-              inputProps={{ step: 0.000001 }}
+              type="text"
+              inputProps={{ inputMode: "decimal", pattern: "^-?(?:\\d+\\.?\\d*|\\d*\\.\\d+)$" }}
               helperText={t("LABEL.LATITUDE_HELP")}
             />
             <TextField
@@ -219,8 +248,8 @@ const LocationInput = forwardRef<LocationInputHandle, LocationInputProps>(
               onChange={(e) => setLongitude(e.target.value)}
               placeholder={t("LABEL.LONGITUDE_PLACEHOLDER")}
               fullWidth
-              type="number"
-              inputProps={{ step: 0.000001 }}
+              type="text"
+              inputProps={{ inputMode: "decimal", pattern: "^-?(?:\\d+\\.?\\d*|\\d*\\.\\d+)$" }}
               helperText={t("LABEL.LONGITUDE_HELP")}
             />
           </Box>

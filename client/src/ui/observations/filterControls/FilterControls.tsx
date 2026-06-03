@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Typography, Slider, Box, Paper } from "@mui/material";
+import { Typography, Slider, Box, Paper, TextField } from "@mui/material";
 import { TuneOutlined as TuneOutlinedIcon } from "@mui/icons-material";
 import { useTranslation } from "react-i18next";
 
@@ -7,16 +7,25 @@ export type Filters = {
   maxMagnitude: number;
   objectTypes: string[];
   minAltitude: number;
+  minAlerts: number;
 }
 
 type FilterControlsProps = {
   filters: Filters;
   onFiltersChange: (filters: Filters) => void;
+  visibilityStart: string;
+  onVisibilityStartChange: (value: string) => void;
+  visibilityEnd: string;
+  onVisibilityEndChange: (value: string) => void;
 }
 
 export default function FilterControls({
   filters,
   onFiltersChange,
+  visibilityStart,
+  onVisibilityStartChange,
+  visibilityEnd,
+  onVisibilityEndChange,
 }: FilterControlsProps) {
   const { t } = useTranslation();
 
@@ -89,10 +98,18 @@ export default function FilterControls({
         {t("LABEL.OBSERVATION_PARAMETERS")}
       </Typography>
 
-      <Box sx={{ display: "flex", gap: 4, mt: 3, mb: 4 }}>
-        <Box sx={{ flex: 1, minWidth: 0 }}>
+      <Box
+        sx={{
+          display: "grid",
+          gridTemplateColumns: { xs: "1fr", lg: "repeat(2, minmax(0, 1fr))" },
+          gap: 3,
+          mt: 3,
+          mb: 4,
+        }}
+      >
+        <Box sx={{ minWidth: 0 }}>
           <Typography gutterBottom>
-            {t("LABEL.MAXIMUM_MAGNITUDE")}:{" "}
+            {t("LABEL.MAXIMUM_MAGNITUDE")}: {" "}
             {getMagnitudeLabel(localMagnitude)}
           </Typography>
           <Slider
@@ -116,7 +133,7 @@ export default function FilterControls({
           </Typography>
         </Box>
 
-        <Box sx={{ flex: 1, minWidth: 0 }}>
+        <Box sx={{ minWidth: 0 }}>
           <Typography gutterBottom>
             {t("LABEL.MINIMUM_ALTITUDE")}: {localAltitude}°
           </Typography>
@@ -140,6 +157,34 @@ export default function FilterControls({
           <Typography variant="caption" color="text.secondary">
             {t("MESSAGE.ALTITUDE_HELP")}
           </Typography>
+        </Box>
+
+      </Box>
+
+      <Box sx={{ display: "flex", gap: 1, mt: 2 }}>
+        <Box sx={{ flex: 1, display: "flex", flexDirection: "column", gap: 0.5 }}>
+          <Typography variant="caption" color="text.secondary">
+            {t("LABEL.VISIBILITY_FROM")}
+          </Typography>
+          <TextField
+            type="time"
+            value={visibilityStart}
+            onChange={(event) => onVisibilityStartChange(event.target.value)}
+            size="small"
+            fullWidth
+          />
+        </Box>
+        <Box sx={{ flex: 1, display: "flex", flexDirection: "column", gap: 0.5 }}>
+          <Typography variant="caption" color="text.secondary">
+            {t("LABEL.VISIBILITY_TO")}
+          </Typography>
+          <TextField
+            type="time"
+            value={visibilityEnd}
+            onChange={(event) => onVisibilityEndChange(event.target.value)}
+            size="small"
+            fullWidth
+          />
         </Box>
       </Box>
     </Paper>

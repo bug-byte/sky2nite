@@ -17,6 +17,22 @@ type AntaresLocusListingAttributes = {
   };
 }
 
+type AntaresAlert = {
+  type: string;
+  id: string;
+  attributes: {
+    properties: {
+      ant_mjd?: number;
+      ztf_jd?: number;
+      [key: string]: any;
+    };
+    [key: string]: any;
+  };
+  mjd?: number;
+  meta: Record<string, any>;
+  relationships: Record<string, any>;
+}
+
 type AntaresLocusListing = {
   type: string;
   id: string;
@@ -27,6 +43,17 @@ type AntaresLocusListing = {
 
 type AntaresListResponse = {
   data: AntaresLocusListing[];
+  links: {
+    self: string;
+    next?: string;
+  };
+  meta: {
+    count: number;
+  };
+}
+
+type AntaresAlertsResponse = {
+  data: AntaresAlert[];
   links: {
     self: string;
     next?: string;
@@ -145,6 +172,78 @@ export class AntaresApiClient {
       catalogs: attrs.catalogs || [],
       properties: attrs.properties || {},
     };
+  }
+
+  private extractAlertMjd(alert: AntaresAlert): number | null {
+    if (typeof alert.mjd === 'number') {
+      return alert.mjd;
+    }
+
+    const props = alert.attributes?.properties;
+    if (!props) {
+      return null;
+    }
+
+    if (typeof props.ant_mjd === 'number') {
+      return props.ant_mjd;
+    }
+
+    if (typeof props.ztf_jd === 'number') {
+      return props.ztf_jd - 2400000.5;
+    }
+
+    return null;
+  }
+
+  private buildAlertActivityCurve(alerts: AntaresAlert[], binCount: number = 8): number[] {
+    const mjds = alerts
+      .map((alert) => this.extractAlertMjd(alert))
+      .filter((value): value is number => value !== null)
+      .sort((a, b) => a - b);
+
+    if (mjds.length === 0) {
+      return [];
+    }
+
+    if (mjds.length === 1) {
+      return [1];
+    }
+
+    const bins = Array.from({ length: Math.min(binCount, mjds.length) }, () => 0);
+    const first = mjds[0];
+    const last = mjds[mjds.length - 1];
+    const span = last - first;
+
+    if (span <= 0) {
+      bins[bins.length - 1] = mjds.length;
+      return bins;
+    }
+
+    for (const mjd of mjds) {
+      const normalized = (mjd - first) / span;
+      const index = Math.min(bins.length - 1, Math.floor(normalized * bins.length));
+      bins[index] += 1;
+    }
+
+    return bins;
+  }
+
+  async fetchAlertActivityCurve(locusId: string, sampleLimit: number = 24): Promise<number[]> {
+    const safeLimit = Math.max(1, Math.min(50, Math.floor(sampleLimit)));
+    const cacheKey = this.getCacheKey('alertActivityCurve', locusId, safeLimit);
+    const cached = this.getCached<number[]>(cacheKey);
+    if (cached) {
+      return cached;
+    }
+
+    const data = await this.get<AntaresAlertsResponse>(`/loci/${locusId}/alerts`, {
+      'page[limit]': safeLimit,
+      'sort': '-mjd',
+    });
+
+    const curve = this.buildAlertActivityCurve(data.data);
+    this.setCache(cacheKey, curve);
+    return curve;
   }
 
   // List loci with optional filters (JSON:API REST format) — internal helper

@@ -29,3 +29,16 @@ export const useAvailableTags = (enabled: boolean = true) => {
     retry: 2,
   });
 };
+
+export const useAlertActivityCurves = (
+  locusIds: string[],
+  enabled: boolean = true,
+) => {
+  return useQuery<Record<string, number[]>, Error>({
+    queryKey: ['alert-activity-curves', locusIds],
+    queryFn: () => api.getAlertActivityCurves(locusIds),
+    enabled: enabled && locusIds.length > 0,
+    staleTime: 10 * 60 * 1000,
+    retry: 1,
+  });
+};

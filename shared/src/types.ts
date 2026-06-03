@@ -1,5 +1,17 @@
 // Types shared between the sky2nite client and server
 
+export type RareClassificationColorMapId = 'aurora' | 'ember' | 'nebula' | 'sunset'
+
+export type RareClassificationSettings = {
+  rareClassificationTags: string[]
+  rareClassificationColorMap: RareClassificationColorMapId
+}
+
+export type UserSettings = {
+  particlesEnabled: boolean
+  rareClassifications: RareClassificationSettings
+}
+
 export type AuthUser = {
   id: number;
   username: string;
@@ -15,6 +27,7 @@ export type SearchFilters = {
   maxMagnitude?: number;
   objectTypes?: string[];
   minAltitude?: number;
+  minAlerts?: number;
 }
 
 export type SearchPagination = {
@@ -25,6 +38,7 @@ export type SearchPagination = {
 export type SearchRequest = LocationInput & {
   filters?: SearchFilters;
   pagination?: SearchPagination;
+  includeAlertActivity?: boolean;
 }
 
 export type VisibilityWindow = {
@@ -38,6 +52,8 @@ export type VisibleObject = {
   ra: number;
   dec: number;
   magnitude: number;
+  numAlerts?: number;
+  alertActivityCurve?: number[];
   tags: string[];
   visibilityWindow: VisibilityWindow;
   maxAltitude: number; // degrees
@@ -115,6 +131,7 @@ export type SavedObservation = {
   ra: number;
   dec: number;
   magnitude: number;
+  numAlerts?: number;
   tags: string[];
   visibilityWindow: VisibilityWindow;
   maxAltitude: number;

@@ -6,6 +6,8 @@ import type { SearchRequest, SearchResponse, SearchResponsePagination, VisibleOb
 const log = getLogger('getTonightObjectsQuery');
 
 const ANTARES_BATCH_SIZE = 500;
+const ALERT_ACTIVITY_SAMPLE_LIMIT = 12;
+const ALERT_ACTIVITY_CONCURRENCY = 4;
 
 export async function getTonightObjectsQuery(request: SearchRequest): Promise<SearchResponse> {
   const { latitude, longitude, filters = {}, pagination = {} } = request;
@@ -25,15 +27,17 @@ export async function getTonightObjectsQuery(request: SearchRequest): Promise<Se
   const maxMagnitude = filters.maxMagnitude ?? 14;
   const tags = filters.objectTypes;
   const minAltitude = filters.minAltitude ?? 15;
+  const minAlerts = Math.max(0, Math.floor(filters.minAlerts ?? 5));
   const safePageSize = Math.max(1, Math.min(500, Math.floor(typeof pagination.pageSize === 'number' ? pagination.pageSize : 500)));
   const safeCursor = Math.max(0, Math.floor(typeof pagination.cursor === 'number' ? pagination.cursor : 0));
+  const includeAlertActivity = request.includeAlertActivity === true;
 
   log.info(`Searching for objects visible from (${latitude}, ${longitude}) on ${observationDate.toISOString()}`);
 
   const { sunset, sunrise } = calculateNightWindow(latitude, longitude, observationDate);
   log.info(`Night window: ${sunset.toISOString()} to ${sunrise.toISOString()}`);
 
-  log.info(`Querying ANTARES for objects with magnitude <= ${maxMagnitude}, starting at cursor ${safeCursor}`);
+  log.info(`Querying ANTARES for objects with magnitude <= ${maxMagnitude}, alerts >= ${minAlerts}, starting at cursor ${safeCursor}`);
 
   const visibleObjects: VisibleObject[] = [];
   let antaresTotalLoci = 0;
@@ -53,6 +57,9 @@ export async function getTonightObjectsQuery(request: SearchRequest): Promise<Se
       // Magnitude filter (API sorts but doesn't filter by value)
       const mag = locus.properties.brightest_alert_magnitude ?? locus.properties.newest_alert_magnitude;
       if (mag === undefined || mag > maxMagnitude) continue;
+
+      const numAlerts = locus.properties.num_alerts ?? 0;
+      if (numAlerts < minAlerts) continue;
 
       // Tag filter — the ANTARES API filter[tag] is not exclusive, so enforce it here.
       // A locus must contain ALL of the requested tags.
@@ -74,6 +81,7 @@ export async function getTonightObjectsQuery(request: SearchRequest): Promise<Se
           ra: locus.ra,
           dec: locus.dec,
           magnitude: mag,
+          numAlerts,
           tags: locus.tags,
           visibilityWindow,
           maxAltitude,
@@ -105,6 +113,34 @@ export async function getTonightObjectsQuery(request: SearchRequest): Promise<Se
   const hasNextPage = nextCursor !== null;
 
   visibleObjects.sort((a, b) => b.visibilityWindow.duration - a.visibilityWindow.duration);
+
+  if (includeAlertActivity && visibleObjects.length > 0) {
+    const enrichedObjects: VisibleObject[] = [];
+
+    for (let index = 0; index < visibleObjects.length; index += ALERT_ACTIVITY_CONCURRENCY) {
+      const chunk = visibleObjects.slice(index, index + ALERT_ACTIVITY_CONCURRENCY);
+      const chunkResults = await Promise.all(
+        chunk.map(async (object) => {
+          try {
+            return {
+              ...object,
+              alertActivityCurve: await antaresApi.fetchAlertActivityCurve(
+                object.locusId,
+                Math.max(1, Math.min(ALERT_ACTIVITY_SAMPLE_LIMIT, object.numAlerts ?? ALERT_ACTIVITY_SAMPLE_LIMIT)),
+              ),
+            };
+          } catch (error) {
+            log.warn(`Failed to fetch alert activity curve for ${object.locusId}: ${error instanceof Error ? error.message : String(error)}`);
+            return object;
+          }
+        }),
+      );
+
+      enrichedObjects.push(...chunkResults);
+    }
+
+    visibleObjects.splice(0, visibleObjects.length, ...enrichedObjects);
+  }
 
   log.info(`${visibleObjects.length} objects are visible tonight (cursor ${safeCursor} → next ${nextCursor ?? 'end'})`);
 
