@@ -346,14 +346,30 @@ function buildCoreColumns<T extends VisibleObject>(
     {
       id: 'visibleWindow',
       name: t('LABEL.VISIBLE_WINDOW'),
-      selector: (row) => row.visibilityWindow.start,
+      selector: (row) => row.transitTime ?? row.visibilityWindow.start,
       sortable: true,
       cell: (row) => (
-        <Box sx={{ py: 0.5, width: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center' }}>
-          <Typography variant="body2" sx={{ fontFamily: 'monospace', fontSize: '0.8rem', whiteSpace: 'nowrap' }}>
-            {formatTime(row.visibilityWindow.start)} – {formatTime(row.visibilityWindow.end)}
-          </Typography>
-          <Typography variant="caption" sx={{ color: 'rgba(255,255,255,0.6)', whiteSpace: 'nowrap' }}>
+        <Box sx={{ py: 0.75, width: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center', gap: 0.25 }}>
+          {row.transitTime && (
+            <Tooltip title={t('LABEL.TRANSIT_TIME')} placement="top">
+              <Typography variant="body2" sx={{ fontFamily: 'monospace', fontSize: '0.8rem', whiteSpace: 'nowrap', color: 'rgba(255, 220, 100, 0.95)', fontWeight: 600 }}>
+                ★ {formatTime(row.transitTime)}
+              </Typography>
+            </Tooltip>
+          )}
+          <Stack direction="row" spacing={1.5} alignItems="center" justifyContent="center">
+            <Tooltip title={t('LABEL.RISE_TIME')} placement="top">
+              <Typography variant="caption" sx={{ fontFamily: 'monospace', whiteSpace: 'nowrap', color: 'rgba(255,255,255,0.55)' }}>
+                ↑ {formatTime(row.visibilityWindow.start)}
+              </Typography>
+            </Tooltip>
+            <Tooltip title={t('LABEL.SET_TIME')} placement="top">
+              <Typography variant="caption" sx={{ fontFamily: 'monospace', whiteSpace: 'nowrap', color: 'rgba(255,255,255,0.55)' }}>
+                ↓ {formatTime(row.visibilityWindow.end)}
+              </Typography>
+            </Tooltip>
+          </Stack>
+          <Typography variant="caption" sx={{ color: 'rgba(255,255,255,0.45)', whiteSpace: 'nowrap' }}>
             {t('MESSAGE.HOURS_ALTITUDE', {
               hours: row.visibilityWindow.duration.toFixed(1),
               altitude: row.maxAltitude,
@@ -361,7 +377,7 @@ function buildCoreColumns<T extends VisibleObject>(
           </Typography>
         </Box>
       ),
-      minWidth: '176px',
+      minWidth: '180px',
       grow: 0,
       center: true,
     },

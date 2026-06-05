@@ -57,6 +57,7 @@ export type VisibleObject = {
   tags: string[];
   visibilityWindow: VisibilityWindow;
   maxAltitude: number; // degrees
+  transitTime?: string; // ISO datetime — when object is at its highest altitude tonight
   objectIds: {
     ztf?: string;
     lsst?: string;

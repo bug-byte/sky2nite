@@ -1,5 +1,5 @@
 import { antaresApi } from '../../services/antaresApi.js';
-import { calculateNightWindow, calculateVisibility } from '../../util/astronomy.js';
+import { calculateNightWindow, calculateVisibility, calculateBestObservationTime } from '../../util/astronomy.js';
 import getLogger from '../../util/getLogger.js';
 import type { SearchRequest, SearchResponse, SearchResponsePagination, VisibleObject } from 'shared/types.js';
 
@@ -76,6 +76,15 @@ export async function getTonightObjectsQuery(request: SearchRequest): Promise<Se
       );
 
       if (isVisible && visibilityWindow) {
+        const { time: transitDate } = calculateBestObservationTime(
+          locus.ra,
+          locus.dec,
+          latitude,
+          longitude,
+          sunset,
+          sunrise,
+        );
+
         visibleObjects.push({
           locusId: locus.locus_id,
           ra: locus.ra,
@@ -85,6 +94,7 @@ export async function getTonightObjectsQuery(request: SearchRequest): Promise<Se
           tags: locus.tags,
           visibilityWindow,
           maxAltitude,
+          transitTime: transitDate.toISOString(),
           objectIds: {
             ztf: locus.properties.ztf_object_id,
             lsst: locus.properties.lsst_dia_object_id,
@@ -112,7 +122,12 @@ export async function getTonightObjectsQuery(request: SearchRequest): Promise<Se
 
   const hasNextPage = nextCursor !== null;
 
-  visibleObjects.sort((a, b) => b.visibilityWindow.duration - a.visibilityWindow.duration);
+  // Sort by transit time ascending — objects that peak earliest in the night come first,
+  // giving observers a chronological session plan.
+  visibleObjects.sort((a, b) => {
+    if (a.transitTime && b.transitTime) return a.transitTime.localeCompare(b.transitTime);
+    return b.visibilityWindow.duration - a.visibilityWindow.duration;
+  });
 
   if (includeAlertActivity && visibleObjects.length > 0) {
     const enrichedObjects: VisibleObject[] = [];

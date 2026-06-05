@@ -188,7 +188,7 @@ export function ObjectsList({
       }
       headerRight={headerRight}
       actionColumn={saveColumn}
-      defaultSortFieldId="magnitude"
+      defaultSortFieldId="visibleWindow"
       defaultSortAsc={true}
       progressComponent={
         <Box sx={{ display: "flex", flexDirection: "column", alignItems: "center", py: 8 }}>

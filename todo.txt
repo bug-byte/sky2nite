@@ -7,7 +7,6 @@ Major Features
 
 - Add a "buy me a coffee" paypal link thing
 - let users set observation status, write observation notes, add a rating
-- Order saved objects by optimal viewing window for tonight, with rise/transit/set times (helps plan a real session rather than just bookmarking)
 - Magnitude change alert highlight saved observation and/or send notification when an object's reported magnitude changes significantly between nights
 
 Bugs / Investigation
@@ -15,5 +14,3 @@ Bugs / Investigation
 - Re-test windows setup script
 - Everything breaks when using search by name (use "ANT2020" as an example)
 - Cant search by name unless you enter lat/long
-- re-test custom tag highlighting
-- fix VITE_GOOGLE_MAPS_API_KEY

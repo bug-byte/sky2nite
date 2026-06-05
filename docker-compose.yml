@@ -17,6 +17,9 @@ services:
     build:
       context: .
       args:
+        # Baked into the client bundle at build time (not used by the server at runtime).
+        # Set this in a root-level .env file or pass it via the shell environment.
+        # For local dev, set VITE_GOOGLE_MAPS_API_KEY in client/.env instead.
         VITE_GOOGLE_MAPS_API_KEY: ${VITE_GOOGLE_MAPS_API_KEY:-}
     ports:
       - "3000:3000"
