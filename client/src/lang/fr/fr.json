@@ -13,7 +13,15 @@
     "SAVE_OBSERVATION": "Enregistrer l'observation",
     "SAVE_SETTINGS": "Enregistrer les paramètres",
     "SAVED": "Enregistré",
-    "DELETE": "Supprimer"
+    "DELETE": "Supprimer",
+    "SAVE_PRESET": "Enregistrer le préréglage",
+    "APPLY_PRESET": "Appliquer",
+    "DELETE_PRESET": "Supprimer",
+    "RENAME_PRESET": "Renommer",
+    "MANAGE_PRESETS": "Gérer les préréglages",
+    "UPDATE_PRESET": "Mettre à jour",
+    "CANCEL": "Annuler",
+    "CLOSE": "Fermer"
   },
   "ERROR": {
     "GEOLOCATION_NOT_SUPPORTED": "La géolocalisation n'est pas prise en charge par votre navigateur",
@@ -92,7 +100,15 @@
     "RARE_CLASSIFICATION_HIGHLIGHTING": "Mise en évidence des classifications rares",
     "RARE_CLASSIFICATION_TAGS": "Étiquettes rares",
     "RARE_CLASSIFICATION_TAGS_PLACEHOLDER": "Saisissez une étiquette ou choisissez dans la liste",
-    "RARE_CLASSIFICATION_COLOR_MAP": "Palette de couleurs des badges"
+    "RARE_CLASSIFICATION_COLOR_MAP": "Palette de couleurs des badges",
+    "FILTER_PRESETS": "Préréglages de filtres",
+    "PRESET_NAME": "Nom du préréglage",
+    "PRESET_NAME_HELP": "Donnez un nom mémorable à cette combinaison (par ex. « Supernovae seulement »)",
+    "NO_PRESETS": "Aucun préréglage de filtre enregistré pour le moment.",
+    "NO_PRESETS_HINT": "Ajustez les filtres ci-dessus, puis cliquez sur Enregistrer le préréglage pour mémoriser cette combinaison et y accéder en un clic.",
+    "ADVANCED_FILTERS": "Filtres avancés",
+    "FILTER_PRESETS_HELP": "Appliquez un ensemble de filtres enregistrés en un clic, ou sauvegardez vos réglages actuels comme nouveau préréglage.",
+    "VISIBILITY_HELP": "Afficher uniquement les objets visibles pendant cette plage horaire. Prend en charge les observations nocturnes (p. ex. 23 h 00 – 3 h 00)."
   },
   "MESSAGE": {
     "ABOUT_LEARN_MORE": "En savoir plus :",
@@ -129,6 +145,13 @@
     "SEARCHING": "Balayage du ciel nocturne...",
     "SEARCHING_SUBTITLE": "Interrogation de la base de données ANTARES et calcul de la visibilité",
     "SETTINGS_DESCRIPTION": "Gérez les paramètres de l'application et les identifiants de connexion.",
+    "PRESET_SAVED": "Préréglage « {{name}} » enregistré.",
+    "PRESET_UPDATED": "Préréglage « {{name}} » mis à jour.",
+    "PRESET_DELETED": "Préréglage « {{name}} » supprimé.",
+    "PRESET_APPLIED": "Préréglage « {{name}} » appliqué.",
+    "PRESET_NAME_REQUIRED": "Veuillez saisir un nom pour ce préréglage.",
+    "PRESET_NAME_TOO_LONG": "Le nom du préréglage ne peut pas dépasser 80 caractères.",
+    "PRESET_UPDATE_OVERWRITE": "Un préréglage nommé « {{name}} » existe déjà. Le mettre à jour avec les filtres actuels ?",
     "APPEARANCE_DESCRIPTION": "Personnalisez l'expérience visuelle de l'application.",
     "PARTICLE_EFFECTS_DESCRIPTION": "Champ d'étoiles animé avec effets de collision. Désactiver pour réduire l'utilisation GPU.",
     "RARE_CLASSIFICATION_DESCRIPTION": "Choisissez quelles classifications doivent être mises en évidence comme rares ou intéressantes, puis sélectionnez la palette de couleurs de leurs badges.",

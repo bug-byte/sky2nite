@@ -13,7 +13,15 @@
     "SAVE_OBSERVATION": "Save Observation",
     "SAVE_SETTINGS": "Save Settings",
     "SAVED": "Saved",
-    "DELETE": "Delete"
+    "DELETE": "Delete",
+    "SAVE_PRESET": "Save Preset",
+    "APPLY_PRESET": "Apply",
+    "DELETE_PRESET": "Delete",
+    "RENAME_PRESET": "Rename",
+    "MANAGE_PRESETS": "Manage Presets",
+    "UPDATE_PRESET": "Update",
+    "CANCEL": "Cancel",
+    "CLOSE": "Close"
   },
   "ERROR": {
     "GEOLOCATION_NOT_SUPPORTED": "Geolocation is not supported by your browser",
@@ -92,7 +100,15 @@
     "RARE_CLASSIFICATION_HIGHLIGHTING": "Rare Classification Highlighting",
     "RARE_CLASSIFICATION_TAGS": "Rare Tags",
     "RARE_CLASSIFICATION_TAGS_PLACEHOLDER": "Type a tag or choose from the list",
-    "RARE_CLASSIFICATION_COLOR_MAP": "Badge Color Map"
+    "RARE_CLASSIFICATION_COLOR_MAP": "Badge Color Map",
+    "FILTER_PRESETS": "Filter Presets",
+    "PRESET_NAME": "Preset Name",
+    "PRESET_NAME_HELP": "Give this combination a memorable name (e.g. \"Supernovae only\")",
+    "NO_PRESETS": "No filter presets saved yet.",
+    "NO_PRESETS_HINT": "Adjust the filters above, then click Save Preset to memorize this combination and switch back in one click.",
+    "ADVANCED_FILTERS": "Advanced Filters",
+    "FILTER_PRESETS_HELP": "Apply a saved set of filters in one click, or save your current settings as a new preset.",
+    "VISIBILITY_HELP": "Only show objects visible during this window. Supports overnight ranges (e.g. 11:00 PM – 3:00 AM)."
   },
   "MESSAGE": {
     "ABOUT_LEARN_MORE": "Learn more:",
@@ -104,7 +120,7 @@
     "DATA_PROVIDED_BY": "Data provided by",
     "WRITTEN_BY": "Code written with love (and a touch of AI) by Devin Major",
     "HOURS_ALTITUDE": "{{hours}} hours | Max altitude: {{altitude}}°",
-    "LOCATION_SUBTITLE": "Enter your location to see which astronomical objects are visible tonight",
+    "LOCATION_SUBTITLE": "Enter your location to see which objects are visible tonight",
     "MAGNITUDE_DARK": "{{value}} (Dark skies)",
     "MAGNITUDE_EASY": "{{value}} (Easy to see)",
     "MAGNITUDE_GOOD": "{{value}} (Good conditions)",
@@ -141,6 +157,13 @@
     "MY_OBSERVATIONS_DESCRIPTION": "Celestial objects you've saved across all your viewing sessions.",
     "NO_SAVED_OBSERVATIONS": "You haven't saved any observations yet. Click the bookmark icon on any object to save it here.",
     "OBSERVATIONS_SAVED_one": "{{count}} Saved Observation",
-    "OBSERVATIONS_SAVED_other": "{{count}} Saved Observations"
+    "OBSERVATIONS_SAVED_other": "{{count}} Saved Observations",
+    "PRESET_SAVED": "Preset \"{{name}}\" saved.",
+    "PRESET_UPDATED": "Preset \"{{name}}\" updated.",
+    "PRESET_DELETED": "Preset \"{{name}}\" deleted.",
+    "PRESET_APPLIED": "Preset \"{{name}}\" applied.",
+    "PRESET_NAME_REQUIRED": "Please enter a name for this preset.",
+    "PRESET_NAME_TOO_LONG": "Preset name cannot exceed 80 characters.",
+    "PRESET_UPDATE_OVERWRITE": "A preset named \"{{name}}\" already exists. Update it with the current filters?"
   }
 }

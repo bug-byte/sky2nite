@@ -11,7 +11,7 @@ import MyObservationsPage from '../myObservations/MyObservationsPage'
 import AuthCard from './auth/AuthCard'
 import { useVisibleObjects, useAvailableTags } from '../../hooks/useVisibleObjects'
 import { useSavedObservations, useSaveObservation } from '../../hooks/useSavedObservations'
-import type { SearchRequest, VisibleObject } from 'shared/types'
+import type { FilterPreset, SearchRequest, VisibleObject } from 'shared/types'
 import { api, type AuthUser } from '../../services/api'
 import type { LocationInputHandle } from '../observations/locationInput/LocationInput'
 import type { Filters } from '../observations/filterControls/FilterControls'
@@ -265,6 +265,34 @@ function App() {
     }
   };
 
+  const handleApplyPreset = useCallback((preset: FilterPreset) => {
+    const nextFilters: Filters = {
+      maxMagnitude: preset.maxMagnitude ?? filters.maxMagnitude,
+      objectTypes: preset.objectTypes,
+      minAltitude: preset.minAltitude ?? filters.minAltitude,
+      minAlerts: preset.minAlerts ?? filters.minAlerts,
+    };
+    setFilters(nextFilters);
+    setVisibilityStart(preset.visibilityStart ?? '');
+    setVisibilityEnd(preset.visibilityEnd ?? '');
+    if (searchRequest) {
+      const resetCursors = [0];
+      setCursors(resetCursors);
+      setPage(1);
+      setSearchRequest({
+        ...searchRequest,
+        date: new Date().toISOString(),
+        filters: {
+          maxMagnitude: nextFilters.maxMagnitude,
+          objectTypes: nextFilters.objectTypes,
+          minAltitude: nextFilters.minAltitude,
+          minAlerts: nextFilters.minAlerts,
+        },
+        pagination: { cursor: 0, pageSize },
+      });
+    }
+  }, [filters, searchRequest, pageSize]);
+
   const handlePageChange = (nextPage: number) => {
     if (!searchRequest || nextPage < 1 || cursors[nextPage - 1] === undefined)
       return;
@@ -343,6 +371,8 @@ function App() {
               savedLocusIds={savedLocusIds}
               onSave={handleSave}
               rareClassificationSettings={rareClassificationSettings}
+              isAuthenticated={Boolean(authUser)}
+              onApplyPreset={handleApplyPreset}
             />
           } />
           <Route path="/my-observations" element={

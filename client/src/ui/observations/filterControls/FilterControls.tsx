@@ -17,6 +17,9 @@ type FilterControlsProps = {
   onVisibilityStartChange: (value: string) => void;
   visibilityEnd: string;
   onVisibilityEndChange: (value: string) => void;
+  /** 'card' (default) renders with its own Paper and title.
+   *  'embedded' renders a plain Box for use inside another card. */
+  variant?: 'card' | 'embedded';
 }
 
 export default function FilterControls({
@@ -26,6 +29,7 @@ export default function FilterControls({
   onVisibilityStartChange,
   visibilityEnd,
   onVisibilityEndChange,
+  variant = 'card',
 }: FilterControlsProps) {
   const { t } = useTranslation();
 
@@ -73,38 +77,29 @@ export default function FilterControls({
     return t("MESSAGE.MAGNITUDE_HARD", { value });
   };
 
-  return (
-    <Paper
-      sx={{
-        padding: "1.5rem",
-        height: "100%",
-        background: "rgba(15, 23, 41, 0.4)",
-        backdropFilter: "blur(12px)",
-        border: "1px solid rgba(255, 255, 255, 0.3)",
-        borderRadius: "1rem",
-        boxShadow: "0 0.5rem 2rem 0 rgba(0, 0, 0, 0.37)",
-        boxSizing: "border-box",
-      }}
-    >
-      <Typography
-        variant="h6"
-        gutterBottom
-        sx={{ display: "flex", alignItems: "center", gap: 1 }}
-      >
-        <TuneOutlinedIcon
-          fontSize="small"
-          sx={{ position: "relative", top: "-0.1em" }}
-        />
-        {t("LABEL.OBSERVATION_PARAMETERS")}
-      </Typography>
+  const content = (
+    <>
+      {variant === 'card' && (
+        <Typography
+          variant="h6"
+          gutterBottom
+          sx={{ display: "flex", alignItems: "center", gap: 1 }}
+        >
+          <TuneOutlinedIcon
+            fontSize="small"
+            sx={{ position: "relative", top: "-0.1em" }}
+          />
+          {t("LABEL.OBSERVATION_PARAMETERS")}
+        </Typography>
+      )}
 
       <Box
         sx={{
           display: "grid",
           gridTemplateColumns: { xs: "1fr", lg: "repeat(2, minmax(0, 1fr))" },
           gap: 3,
-          mt: 3,
-          mb: 4,
+          mt: variant === 'card' ? 3 : 0,
+          mb: variant === 'card' ? 4 : 2,
         }}
       >
         <Box sx={{ minWidth: 0 }}>
@@ -161,32 +156,55 @@ export default function FilterControls({
 
       </Box>
 
-      <Box sx={{ display: "flex", gap: 1, mt: 2 }}>
-        <Box sx={{ flex: 1, display: "flex", flexDirection: "column", gap: 0.5 }}>
-          <Typography variant="caption" color="text.secondary">
-            {t("LABEL.VISIBILITY_FROM")}
-          </Typography>
-          <TextField
-            type="time"
-            value={visibilityStart}
-            onChange={(event) => onVisibilityStartChange(event.target.value)}
-            size="small"
-            fullWidth
-          />
+      {variant !== 'embedded' && (
+        <Box sx={{ display: "flex", gap: 1, mt: 2 }}>
+          <Box sx={{ flex: 1, display: "flex", flexDirection: "column", gap: 0.5 }}>
+            <Typography variant="caption" color="text.secondary">
+              {t("LABEL.VISIBILITY_FROM")}
+            </Typography>
+            <TextField
+              type="time"
+              value={visibilityStart}
+              onChange={(event) => onVisibilityStartChange(event.target.value)}
+              size="small"
+              fullWidth
+            />
+          </Box>
+          <Box sx={{ flex: 1, display: "flex", flexDirection: "column", gap: 0.5 }}>
+            <Typography variant="caption" color="text.secondary">
+              {t("LABEL.VISIBILITY_TO")}
+            </Typography>
+            <TextField
+              type="time"
+              value={visibilityEnd}
+              onChange={(event) => onVisibilityEndChange(event.target.value)}
+              size="small"
+              fullWidth
+            />
+          </Box>
         </Box>
-        <Box sx={{ flex: 1, display: "flex", flexDirection: "column", gap: 0.5 }}>
-          <Typography variant="caption" color="text.secondary">
-            {t("LABEL.VISIBILITY_TO")}
-          </Typography>
-          <TextField
-            type="time"
-            value={visibilityEnd}
-            onChange={(event) => onVisibilityEndChange(event.target.value)}
-            size="small"
-            fullWidth
-          />
-        </Box>
-      </Box>
+      )}
+    </>
+  );
+
+  if (variant === 'embedded') {
+    return <Box>{content}</Box>;
+  }
+
+  return (
+    <Paper
+      sx={{
+        padding: "1.5rem",
+        height: "100%",
+        background: "rgba(15, 23, 41, 0.4)",
+        backdropFilter: "blur(12px)",
+        border: "1px solid rgba(255, 255, 255, 0.3)",
+        borderRadius: "1rem",
+        boxShadow: "0 0.5rem 2rem 0 rgba(0, 0, 0, 0.37)",
+        boxSizing: "border-box",
+      }}
+    >
+      {content}
     </Paper>
   );
 }

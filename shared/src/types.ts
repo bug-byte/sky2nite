@@ -163,3 +163,42 @@ export type SaveObservationRequest = {
 export type DeleteObservationResult = {
   success: true;
 }
+
+// Filter presets
+export type FilterPreset = {
+  id: number;
+  userId: number;
+  name: string;
+  maxMagnitude?: number;
+  minAltitude?: number;
+  minAlerts?: number;
+  objectTypes: string[];
+  visibilityStart: string;  // HH:MM
+  visibilityEnd: string;    // HH:MM
+  createdAt: string; // ISO datetime
+  updatedAt: string; // ISO datetime
+}
+
+export type CreateFilterPresetRequest = {
+  name: string;
+  maxMagnitude?: number;
+  minAltitude?: number;
+  minAlerts?: number;
+  objectTypes?: string[];
+  visibilityStart?: string;
+  visibilityEnd?: string;
+}
+
+export type UpdateFilterPresetRequest = {
+  name?: string;
+  maxMagnitude?: number;
+  minAltitude?: number;
+  minAlerts?: number;
+  objectTypes?: string[];
+  visibilityStart?: string;
+  visibilityEnd?: string;
+}
+
+export type DeleteFilterPresetResult = {
+  success: true;
+}

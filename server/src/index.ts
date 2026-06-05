@@ -11,6 +11,7 @@ import { requireAuth } from './api/auth/authMiddleware.js';
 import { objectsRouter } from './api/objects/objectsRouter.js';
 import { observationsRouter } from './api/observations/observationsRouter.js';
 import { settingsRouter } from './api/settings/settingsRouter.js';
+import { filterPresetsRouter } from './api/filterPresets/filterPresetsRouter.js';
 import { initDb } from './services/db.js';
 import { initializeDatabaseFromScripts } from './services/dbInitialization.js';
 import getLogger from './util/getLogger.js';
@@ -65,6 +66,7 @@ app.use('/api/auth', authLimiter, authRouter);
 app.use('/api/objects', requireAuth, objectsRouter);
 app.use('/api/observations', requireAuth, observationsRouter);
 app.use('/api/settings', requireAuth, settingsRouter);
+app.use('/api/filter-presets', requireAuth, filterPresetsRouter);
 
 if (process.env.NODE_ENV !== 'production') {
   app.get('/', (_req, res) => {

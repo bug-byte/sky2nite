@@ -1,5 +1,13 @@
 import axios from 'axios';
-import type { SearchRequest, SearchResponse, SavedObservation, SaveObservationRequest } from 'shared/types';
+import type {
+  SearchRequest,
+  SearchResponse,
+  SavedObservation,
+  SaveObservationRequest,
+  FilterPreset,
+  CreateFilterPresetRequest,
+  UpdateFilterPresetRequest,
+} from 'shared/types';
 import type { AuthUser } from 'shared/types';
 import type { UserSettings } from 'shared/types';
 export type { AuthUser };
@@ -151,6 +159,23 @@ export const api = {
 
   updateSettings: async (patch: Partial<UserSettings>): Promise<UserSettings> => {
     return requestEnvelope(apiClient.patch<ApiEnvelope<UserSettings>>('/settings', patch));
+  },
+
+  // Filter presets
+  getFilterPresets: async (): Promise<FilterPreset[]> => {
+    return requestEnvelope(apiClient.get<ApiEnvelope<FilterPreset[]>>('/filter-presets'));
+  },
+
+  createFilterPreset: async (body: CreateFilterPresetRequest): Promise<FilterPreset> => {
+    return requestEnvelope(apiClient.post<ApiEnvelope<FilterPreset>>('/filter-presets', body));
+  },
+
+  updateFilterPreset: async (id: number, body: UpdateFilterPresetRequest): Promise<FilterPreset> => {
+    return requestEnvelope(apiClient.patch<ApiEnvelope<FilterPreset>>(`/filter-presets/${id}`, body));
+  },
+
+  deleteFilterPreset: async (id: number): Promise<void> => {
+    await requestEnvelope(apiClient.delete<ApiEnvelope<{ success: true }>>(`/filter-presets/${id}`));
   },
 };
 
