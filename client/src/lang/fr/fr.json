@@ -21,7 +21,9 @@
     "MANAGE_PRESETS": "Gérer les préréglages",
     "UPDATE_PRESET": "Mettre à jour",
     "CANCEL": "Annuler",
-    "CLOSE": "Fermer"
+    "CLOSE": "Fermer",
+    "MY_NOTES": "Mes notes",
+    "SAVE": "Enregistrer"
   },
   "ERROR": {
     "GEOLOCATION_NOT_SUPPORTED": "La géolocalisation n'est pas prise en charge par votre navigateur",
@@ -90,6 +92,14 @@
     "NAV_SETTINGS": "Paramètres",
     "NAV_MY_OBSERVATIONS": "Mes observations",
     "SAVED_ON": "Enregistré le",
+    "MY_NOTES": "Mes notes",
+    "OBSERVATION_STATUS": "Statut",
+    "STATUS_PLANNED": "Planifié",
+    "STATUS_OBSERVED": "Observé",
+    "STATUS_SKIPPED": "Ignoré",
+    "OBSERVATION_RATING": "Évaluation",
+    "OBSERVATION_NOTES": "Notes",
+    "OBSERVATION_NOTES_PLACEHOLDER": "Qu'avez-vous observé ? Quelles étaient les conditions ?",
     "RA_TOOLTIP": "Ascension droite — longitude céleste, en degrés (0–360)",
     "DEC_TOOLTIP": "Déclinaison — latitude céleste, en degrés (−90 à +90)",
     "CHANGE_USERNAME": "Modifier le nom d'utilisateur",

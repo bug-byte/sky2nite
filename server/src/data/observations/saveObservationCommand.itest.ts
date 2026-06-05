@@ -40,6 +40,10 @@ const makeReturnedRow = (overrides: object = {}) => ({
   lsst_dia_object_id: null,
   antares_url: 'https://antares.noirlab.edu/loci/ANT2025abc123',
   notes: '',
+  num_alerts: null,
+  transit_time: null,
+  status: 'planned',
+  rating: null,
   saved_at: new Date('2025-01-01T20:00:00Z'),
   ...overrides,
 });
@@ -95,7 +99,7 @@ describe('saveObservationCommand', () => {
     await saveObservationCommand(42, { ...baseRequest, objectIds: {} });
 
     const params = mockQuery.mock.calls[0][1] as unknown[];
-    expect(params[10]).toBeNull(); // ztf_object_id param index
+    expect(params[12]).toBeNull(); // ztf_object_id param index
   });
 
   it('defaults notes to empty string when not provided', async () => {
@@ -104,7 +108,7 @@ describe('saveObservationCommand', () => {
     await saveObservationCommand(42, baseRequest); // baseRequest has no notes field
 
     const params = mockQuery.mock.calls[0][1] as unknown[];
-    expect(params[13]).toBe(''); // notes param index
+    expect(params[15]).toBe(''); // notes param index
   });
 
   it('passes provided notes to the query', async () => {
@@ -113,7 +117,7 @@ describe('saveObservationCommand', () => {
     await saveObservationCommand(42, { ...baseRequest, notes: 'Great view' });
 
     const params = mockQuery.mock.calls[0][1] as unknown[];
-    expect(params[13]).toBe('Great view');
+    expect(params[15]).toBe('Great view');
   });
 
   it('propagates errors thrown by the DB pool', async () => {

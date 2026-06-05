@@ -4,6 +4,7 @@ import type {
   SearchResponse,
   SavedObservation,
   SaveObservationRequest,
+  UpdateObservationRequest,
   FilterPreset,
   CreateFilterPresetRequest,
   UpdateFilterPresetRequest,
@@ -150,6 +151,10 @@ export const api = {
 
   deleteObservation: async (id: number): Promise<void> => {
     await requestEnvelope(apiClient.delete<ApiEnvelope<{ success: true }>>(`/observations/${id}`));
+  },
+
+  updateObservation: async (id: number, body: UpdateObservationRequest): Promise<SavedObservation> => {
+    return requestEnvelope(apiClient.patch<ApiEnvelope<SavedObservation>>(`/observations/${id}`, body));
   },
 
   // User settings

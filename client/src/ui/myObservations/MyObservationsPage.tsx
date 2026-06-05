@@ -1,6 +1,7 @@
 import { type TableColumn } from 'react-data-table-component'
 import {
   Box,
+  Button,
   Container,
   Typography,
   Alert,
@@ -10,13 +11,15 @@ import {
 import {
   BookmarkAdded as BookmarkAddedIcon,
   Delete as DeleteIcon,
+  NoteAlt as NoteAltIcon,
 } from '@mui/icons-material'
-import { useMemo } from 'react'
+import { useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useDeleteObservation } from '../../hooks/useSavedObservations'
 import type { SavedObservation } from 'shared/types'
 import type { RareClassificationSettings } from 'shared/types'
 import ObjectsDataTable from '../shared/ObjectsDataTable'
+import ObservationNotesDialog from './ObservationNotesDialog'
 
 function formatDate(isoString: string) {
   return new Date(isoString).toLocaleDateString(undefined, {
@@ -36,6 +39,30 @@ type MyObservationsPageProps = {
 export default function MyObservationsPage({ observations, isLoading, error, rareClassificationSettings }: MyObservationsPageProps) {
   const { t } = useTranslation()
   const deleteObservation = useDeleteObservation()
+  const [notesTarget, setNotesTarget] = useState<SavedObservation | null>(null)
+
+  const notesColumn = useMemo<TableColumn<SavedObservation>>(
+    () => ({
+      id: 'notes',
+      name: '',
+      cell: (row) => (
+        <Box sx={{ display: 'flex', justifyContent: 'center', width: '100%' }}>
+          <Button
+            size="small"
+            startIcon={<NoteAltIcon fontSize="small" />}
+            onClick={() => setNotesTarget(row)}
+            sx={{ textTransform: 'none', fontSize: '0.75rem', whiteSpace: 'nowrap' }}
+          >
+            {t('COMMAND.MY_NOTES')}
+          </Button>
+        </Box>
+      ),
+      width: '110px',
+      button: true,
+      center: true,
+    }),
+    [t],
+  )
 
   const savedOnColumn = useMemo<TableColumn<SavedObservation>>(
     () => ({
@@ -112,7 +139,7 @@ export default function MyObservationsPage({ observations, isLoading, error, rar
             ? t('MESSAGE.SEARCHING')
             : t('MESSAGE.OBSERVATIONS_SAVED', { count: observations.length })
         }
-        middleColumns={[savedOnColumn]}
+        middleColumns={[savedOnColumn, notesColumn]}
         actionColumn={deleteColumn}
         defaultSortFieldId="savedOn"
         defaultSortAsc={false}
@@ -126,6 +153,11 @@ export default function MyObservationsPage({ observations, isLoading, error, rar
             </Typography>
           </Box>
         }
+      />
+
+      <ObservationNotesDialog
+        observation={notesTarget}
+        onClose={() => setNotesTarget(null)}
       />
     </Container>
   )

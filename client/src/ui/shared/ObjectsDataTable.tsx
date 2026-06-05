@@ -526,7 +526,7 @@ export default function ObjectsDataTable<T extends VisibleObject>({
         },
       );
       if (!showAlertActivity) {
-        coreColumns.splice(8, 1);
+        coreColumns.splice(6, 1);
       }
 
       return [

@@ -21,7 +21,9 @@
     "MANAGE_PRESETS": "Manage Presets",
     "UPDATE_PRESET": "Update",
     "CANCEL": "Cancel",
-    "CLOSE": "Close"
+    "CLOSE": "Close",
+    "MY_NOTES": "My Notes",
+    "SAVE": "Save"
   },
   "ERROR": {
     "GEOLOCATION_NOT_SUPPORTED": "Geolocation is not supported by your browser",
@@ -90,6 +92,14 @@
     "NAV_SETTINGS": "Settings",
     "NAV_MY_OBSERVATIONS": "My Observations",
     "SAVED_ON": "Saved On",
+    "MY_NOTES": "My Notes",
+    "OBSERVATION_STATUS": "Status",
+    "STATUS_PLANNED": "Planned",
+    "STATUS_OBSERVED": "Observed",
+    "STATUS_SKIPPED": "Skipped",
+    "OBSERVATION_RATING": "Rating",
+    "OBSERVATION_NOTES": "Notes",
+    "OBSERVATION_NOTES_PLACEHOLDER": "What did you see? How were the conditions?",
     "RA_TOOLTIP": "Right Ascension — celestial longitude, in degrees (0–360)",
     "DEC_TOOLTIP": "Declination — celestial latitude, in degrees (−90 to +90)",
     "CHANGE_USERNAME": "Change Username",

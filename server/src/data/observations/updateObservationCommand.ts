@@ -1,5 +1,5 @@
 import pool from '../../services/db.js';
-import type { ObservationStatus, SavedObservation } from 'shared/types.js';
+import type { ObservationStatus, SavedObservation, UpdateObservationRequest } from 'shared/types.js';
 
 type ObservationRow = {
   id: number;
@@ -24,7 +24,35 @@ type ObservationRow = {
   saved_at: Date;
 };
 
-function rowToObservation(row: ObservationRow): SavedObservation {
+export async function updateObservationCommand(
+  userId: number,
+  id: number,
+  body: UpdateObservationRequest,
+): Promise<SavedObservation> {
+  const result = await pool.query<ObservationRow>(
+    `
+      UPDATE saved_observations
+      SET
+        notes  = COALESCE($3, notes),
+        status = COALESCE($4, status),
+        rating = $5
+      WHERE id = $1 AND user_id = $2
+      RETURNING *;
+    `,
+    [
+      id,
+      userId,
+      body.notes ?? null,
+      body.status ?? null,
+      body.rating !== undefined ? body.rating : null,
+    ],
+  );
+
+  if (result.rows.length === 0) {
+    throw new Error('Observation not found or access denied.');
+  }
+
+  const row = result.rows[0];
   return {
     id: row.id,
     userId: row.user_id,
@@ -51,12 +79,4 @@ function rowToObservation(row: ObservationRow): SavedObservation {
     rating: row.rating ?? null,
     savedAt: row.saved_at.toISOString(),
   };
-}
-
-export async function getObservationsQuery(userId: number): Promise<SavedObservation[]> {
-  const result = await pool.query<ObservationRow>(
-    `SELECT * FROM saved_observations WHERE user_id = $1 ORDER BY saved_at DESC;`,
-    [userId],
-  );
-  return result.rows.map(rowToObservation);
 }

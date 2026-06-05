@@ -125,6 +125,8 @@ export type UpdatePasswordResult = {
 }
 
 // Saved observations
+export type ObservationStatus = 'planned' | 'observed' | 'skipped'
+
 export type SavedObservation = {
   id: number;
   userId: number;
@@ -133,6 +135,7 @@ export type SavedObservation = {
   dec: number;
   magnitude: number;
   numAlerts?: number;
+  transitTime?: string;
   tags: string[];
   visibilityWindow: VisibilityWindow;
   maxAltitude: number;
@@ -142,6 +145,8 @@ export type SavedObservation = {
   };
   antaresUrl: string;
   notes: string;
+  status: ObservationStatus;
+  rating: number | null; // 1–5
   savedAt: string; // ISO datetime
 }
 
@@ -150,6 +155,8 @@ export type SaveObservationRequest = {
   ra: number;
   dec: number;
   magnitude: number;
+  numAlerts?: number;
+  transitTime?: string;
   tags: string[];
   visibilityWindow: VisibilityWindow;
   maxAltitude: number;
@@ -164,7 +171,11 @@ export type SaveObservationRequest = {
 export type DeleteObservationResult = {
   success: true;
 }
-
+export type UpdateObservationRequest = {
+  notes?: string;
+  status?: ObservationStatus;
+  rating?: number | null;
+}
 // Filter presets
 export type FilterPreset = {
   id: number;

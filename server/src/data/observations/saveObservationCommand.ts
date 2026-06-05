@@ -1,5 +1,5 @@
 import pool from '../../services/db.js';
-import type { SavedObservation, SaveObservationRequest } from 'shared/types.js';
+import type { ObservationStatus, SavedObservation, SaveObservationRequest } from 'shared/types.js';
 
 type ObservationRow = {
   id: number;
@@ -8,6 +8,8 @@ type ObservationRow = {
   ra: number;
   dec: number;
   magnitude: number;
+  num_alerts: number | null;
+  transit_time: Date | null;
   tags: string[];
   visibility_start: Date;
   visibility_end: Date;
@@ -17,6 +19,8 @@ type ObservationRow = {
   lsst_dia_object_id: string | null;
   antares_url: string;
   notes: string;
+  status: ObservationStatus;
+  rating: number | null;
   saved_at: Date;
 };
 
@@ -27,15 +31,17 @@ export async function saveObservationCommand(
   const result = await pool.query<ObservationRow>(
     `
       INSERT INTO saved_observations (
-        user_id, locus_id, ra, dec, magnitude, tags,
+        user_id, locus_id, ra, dec, magnitude, num_alerts, transit_time, tags,
         visibility_start, visibility_end, visibility_duration,
         max_altitude, ztf_object_id, lsst_dia_object_id, antares_url, notes
       )
-      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14)
+      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16)
       ON CONFLICT (user_id, locus_id) DO UPDATE SET
         ra = EXCLUDED.ra,
         dec = EXCLUDED.dec,
         magnitude = EXCLUDED.magnitude,
+        num_alerts = EXCLUDED.num_alerts,
+        transit_time = EXCLUDED.transit_time,
         tags = EXCLUDED.tags,
         visibility_start = EXCLUDED.visibility_start,
         visibility_end = EXCLUDED.visibility_end,
@@ -54,6 +60,8 @@ export async function saveObservationCommand(
       body.ra,
       body.dec,
       body.magnitude,
+      body.numAlerts ?? null,
+      body.transitTime ?? null,
       body.tags,
       body.visibilityWindow.start,
       body.visibilityWindow.end,
@@ -74,6 +82,8 @@ export async function saveObservationCommand(
     ra: row.ra,
     dec: row.dec,
     magnitude: row.magnitude,
+    numAlerts: row.num_alerts ?? undefined,
+    transitTime: row.transit_time?.toISOString() ?? undefined,
     tags: row.tags,
     visibilityWindow: {
       start: row.visibility_start.toISOString(),
@@ -87,6 +97,8 @@ export async function saveObservationCommand(
     },
     antaresUrl: row.antares_url,
     notes: row.notes,
+    status: row.status ?? 'planned',
+    rating: row.rating ?? null,
     savedAt: row.saved_at.toISOString(),
   };
 }

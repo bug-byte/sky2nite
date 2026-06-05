@@ -12,6 +12,7 @@ jest.unstable_mockModule('../../services/antaresApi.js', () => ({
 jest.unstable_mockModule('../../util/astronomy.js', () => ({
   calculateNightWindow: mockNightWindow,
   calculateVisibility: mockVisibility,
+  calculateBestObservationTime: jest.fn(() => ({ time: new Date('2025-01-01T03:00:00Z') })),
 }));
 
 const { getTonightObjectsQuery } = await import('./getTonightObjectsQuery.js');

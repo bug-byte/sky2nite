@@ -3,6 +3,7 @@ import { responder } from '../util/apiHelper.js';
 import { getObservationsQuery } from '../../data/observations/getObservationsQuery.js';
 import { saveObservationCommand } from '../../data/observations/saveObservationCommand.js';
 import { deleteObservationCommand } from '../../data/observations/deleteObservationCommand.js';
+import { updateObservationCommand } from '../../data/observations/updateObservationCommand.js';
 import type { AuthenticatedRequest } from '../auth/authMiddleware.js';
 
 const observationsRouter = Router();
@@ -15,6 +16,15 @@ observationsRouter.get(
 observationsRouter.post(
   '/',
   responder((req) => saveObservationCommand((req as AuthenticatedRequest).authUser!.id, req.body)),
+);
+
+observationsRouter.patch(
+  '/:id',
+  responder((req) => {
+    const id = parseInt(req.params!.id, 10);
+    if (!Number.isFinite(id)) throw new Error('Invalid observation ID.');
+    return updateObservationCommand((req as AuthenticatedRequest).authUser!.id, id, req.body);
+  }),
 );
 
 observationsRouter.delete(

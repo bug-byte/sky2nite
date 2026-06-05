@@ -4,6 +4,7 @@ module.exports = {
   testEnvironment: 'node',
   extensionsToTreatAsEsm: ['.ts'],
   testMatch: ['<rootDir>/src/**/*.itest.ts'],
+  maxWorkers: 1,
   moduleNameMapper: {
     // Strip .js from shared/* imports before remapping to source
     '^shared/(.+)\\.js$': '<rootDir>/../shared/src/$1',
@@ -14,8 +15,9 @@ module.exports = {
   transform: {
     '^.+\\.ts$': ['ts-jest', {
       useESM: true,
+
       tsconfig: '<rootDir>/tsconfig.test.json',
     }],
   },
-  setupFiles: ['<rootDir>/src/test/setup.ts'],
+  setupFiles: ['<rootDir>/src/test/setup.cjs'],
 };

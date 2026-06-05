@@ -3,11 +3,12 @@
     "target": "ES2022",
     "module": "ESNext",
     "lib": ["ES2022"],
-    "moduleResolution": "bundler",
+    "moduleResolution": "node",
     "strict": true,
     "esModuleInterop": true,
     "skipLibCheck": true,
     "noEmit": true,
+    "isolatedModules": true,
     "baseUrl": ".",
     "paths": {
       "shared/*": ["../shared/src/*"]

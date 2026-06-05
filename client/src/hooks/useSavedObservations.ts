@@ -1,6 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { api } from '../services/api';
-import type { SavedObservation, SaveObservationRequest } from 'shared/types';
+import type { SavedObservation, SaveObservationRequest, UpdateObservationRequest } from 'shared/types';
 
 const QUERY_KEY = ['saved-observations'];
 
@@ -63,6 +63,18 @@ export const useDeleteObservation = () => {
     mutationFn: (id) => api.deleteObservation(id),
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: QUERY_KEY });
+    },
+  });
+};
+
+export const useUpdateObservation = () => {
+  const queryClient = useQueryClient();
+  return useMutation<SavedObservation, Error, { id: number; body: UpdateObservationRequest }>({
+    mutationFn: ({ id, body }) => api.updateObservation(id, body),
+    onSuccess: (updated) => {
+      queryClient.setQueryData<SavedObservation[]>(QUERY_KEY, (old = []) =>
+        old.map((o) => (o.id === updated.id ? updated : o)),
+      );
     },
   });
 };

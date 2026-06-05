@@ -73,6 +73,8 @@ function App() {
         ra: object.ra,
         dec: object.dec,
         magnitude: object.magnitude,
+        numAlerts: object.numAlerts,
+        transitTime: object.transitTime,
         tags: object.tags,
         visibilityWindow: object.visibilityWindow,
         maxAltitude: object.maxAltitude,
