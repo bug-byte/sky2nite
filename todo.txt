@@ -6,7 +6,6 @@ Ops
 Major Features
 
 - Add a "buy me a coffee" paypal link thing
-- let users set observation status, write observation notes, add a rating
 - Magnitude change alert highlight saved observation and/or send notification when an object's reported magnitude changes significantly between nights
 
 Bugs / Investigation
