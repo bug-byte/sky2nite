@@ -29,6 +29,8 @@ type LocationInputProps = {
 export type LocationInputHandle = {
   submit: () => void;
   useCurrentLocation: () => void;
+  /** Returns { latitude, longitude } if valid coords are entered, otherwise null. */
+  getValues: () => { latitude: number; longitude: number } | null;
 }
 
 // Get Google API key from environment or use a placeholder
@@ -177,6 +179,14 @@ const LocationInput = forwardRef<LocationInputHandle, LocationInputProps>(
     useImperativeHandle(ref, () => ({
       submit: handleManualSubmit,
       useCurrentLocation: handleUseCurrentLocation,
+      getValues: () => {
+        const lat = Number.parseFloat(latitude);
+        const lon = Number.parseFloat(longitude);
+        if (Number.isFinite(lat) && Number.isFinite(lon) && lat >= -90 && lat <= 90 && lon >= -180 && lon <= 180) {
+          return { latitude: lat, longitude: lon };
+        }
+        return null;
+      },
     }));
 
     useEffect(() => {

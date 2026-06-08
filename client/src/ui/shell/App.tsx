@@ -233,6 +233,7 @@ function App() {
     const resetCursors = [0];
     setCursors(resetCursors);
     setPage(1);
+    const name = locusIdFilter.trim();
     setSearchRequest({
       latitude,
       longitude,
@@ -242,6 +243,7 @@ function App() {
         objectTypes: filters.objectTypes,
         minAltitude: filters.minAltitude,
           minAlerts: filters.minAlerts,
+        ...(name ? { locusName: name } : {}),
       },
       pagination: { cursor: 0, pageSize },
     });
@@ -257,6 +259,7 @@ function App() {
         ...searchRequest,
         date: new Date().toISOString(),
         filters: {
+          ...searchRequest.filters,
           maxMagnitude: newFilters.maxMagnitude,
           objectTypes: newFilters.objectTypes,
           minAltitude: newFilters.minAltitude,
@@ -266,6 +269,35 @@ function App() {
       });
     }
   };
+
+  const handleSearchByName = useCallback((name: string, location?: { latitude: number; longitude: number } | null) => {
+    const trimmed = name.trim();
+    if (!trimmed) return;
+
+    const resetCursors = [0];
+    setCursors(resetCursors);
+    setPage(1);
+
+    // Use the explicitly-passed location, or fall back to a previous search's
+    // location if the user already searched once.
+    const lat = location?.latitude ?? searchRequest?.latitude;
+    const lng = location?.longitude ?? searchRequest?.longitude;
+
+    const hasLocation = typeof lat === 'number' && typeof lng === 'number';
+
+    setSearchRequest({
+      ...(hasLocation ? { latitude: lat!, longitude: lng! } : {}),
+      date: new Date().toISOString(),
+      filters: {
+        locusName: trimmed,
+        maxMagnitude: filters.maxMagnitude,
+        minAltitude: filters.minAltitude,
+        minAlerts: filters.minAlerts,
+        objectTypes: filters.objectTypes.length > 0 ? filters.objectTypes : undefined,
+      },
+      pagination: { cursor: 0, pageSize: 500 },
+    });
+  }, [searchRequest, filters]);
 
   const handleApplyPreset = useCallback((preset: FilterPreset) => {
     const nextFilters: Filters = {
@@ -285,6 +317,7 @@ function App() {
         ...searchRequest,
         date: new Date().toISOString(),
         filters: {
+          ...searchRequest.filters,
           maxMagnitude: nextFilters.maxMagnitude,
           objectTypes: nextFilters.objectTypes,
           minAltitude: nextFilters.minAltitude,
@@ -375,6 +408,7 @@ function App() {
               rareClassificationSettings={rareClassificationSettings}
               isAuthenticated={Boolean(authUser)}
               onApplyPreset={handleApplyPreset}
+              onSearchByName={handleSearchByName}
             />
           } />
           <Route path="/my-observations" element={

@@ -67,6 +67,7 @@ type ObservationsPageProps = {
   rareClassificationSettings: RareClassificationSettings
   isAuthenticated: boolean
   onApplyPreset: (preset: FilterPreset) => void
+  onSearchByName: (name: string, location?: { latitude: number; longitude: number } | null) => void
 }
 
 export default function ObservationsPage({
@@ -97,6 +98,7 @@ export default function ObservationsPage({
   savedLocusIds,
   isAuthenticated,
   onApplyPreset,
+  onSearchByName,
   onSave,
   rareClassificationSettings,
 }: ObservationsPageProps) {
@@ -281,6 +283,13 @@ export default function ObservationsPage({
                 placeholder={t('LABEL.LOCUS_ID_SEARCH_PLACEHOLDER')}
                 value={locusIdFilter}
                 onChange={(e) => onLocusIdFilterChange(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' && locusIdFilter.trim()) {
+                    // Main Search button will pick up name + optional location
+                    // We trigger a click on it so the same unified logic runs
+                    document.getElementById('search-sky-btn')?.click();
+                  }
+                }}
                 size="small"
                 fullWidth
               />
@@ -300,10 +309,20 @@ export default function ObservationsPage({
         {/* Step 3: Search */}
         <Box sx={{ mb: 2 }}>
           <Button
+            id="search-sky-btn"
             variant="contained"
             size="large"
             fullWidth
-            onClick={() => locationRef.current?.submit()}
+            onClick={() => {
+              const name = locusIdFilter.trim();
+              if (name) {
+                // Also grab any coords the user typed in LocationInput
+                const loc = locationRef.current?.getValues?.() ?? null;
+                onSearchByName(name, loc);
+              } else {
+                locationRef.current?.submit();
+              }
+            }}
             disabled={locationLoading}
           >
             <SearchIcon fontSize="small" sx={{ mr: 0.75, position: 'relative', top: '-0.1em' }} />

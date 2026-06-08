@@ -23,7 +23,8 @@
     "CANCEL": "Cancel",
     "CLOSE": "Close",
     "MY_NOTES": "My Notes",
-    "SAVE": "Save"
+    "SAVE": "Save",
+    "SEARCH": "Search"
   },
   "ERROR": {
     "GEOLOCATION_NOT_SUPPORTED": "Geolocation is not supported by your browser",
@@ -118,7 +119,7 @@
     "PRESET_NAME": "Preset Name",
     "PRESET_NAME_HELP": "Give this combination a memorable name (e.g. \"Supernovae only\")",
     "NO_PRESETS": "No filter presets saved yet.",
-    "NO_PRESETS_HINT": "Adjust the filters above, then click Save Preset to memorize this combination and switch back in one click.",
+    "NO_PRESETS_HINT": "Adjust the filters below, then click Save Preset to memorize this combination and switch back in one click.",
     "ADVANCED_FILTERS": "Advanced Filters",
     "FILTER_PRESETS_HELP": "Apply a saved set of filters in one click, or save your current settings as a new preset.",
     "VISIBILITY_HELP": "Only show objects visible during this window. Supports overnight ranges (e.g. 11:00 PM – 3:00 AM)."
@@ -141,14 +142,14 @@
     "ALTITUDE_HELP": "Objects must reach this altitude above the horizon to appear in results. Higher values mean less atmospheric interference.",
     "MAGNITUDE_HELP": "Brighter objects have lower magnitude values. Most consumer telescopes can see objects up to magnitude 12-14 in good conditions.",
     "MIN_ALERTS_HELP": "Type a minimum ANTARES alert count. Higher values surface repeat detections and ongoing transients; the default is 5.",
-    "LOCUS_ID_SEARCH_HELP": "Search by an exact locus ID or any part of the name.",
+    "LOCUS_ID_SEARCH_HELP": "Search by exact Locus ID (e.g. ANT2021y65ce). Partial name matching is limited to the brightest objects.",
     "MORE_TAGS": "+{{count}} more",
     "ALERT_ACTIVITY_SINGLE": "{{count}} alert",
     "ALERT_ACTIVITY": "{{count}} alerts",
     "ALERT_ACTIVITY_TOOLTIP": "Higher alert counts are a rough proxy for multi-night consistency and activity.",
     "CLASSIFICATION_RARITY_HINT": "Rare or high-interest classifications are highlighted in the table.",
     "ALERT_ACTIVITY_CURVE_TOOLTIP": "This sparkline shows a recent alert timeline for the locus, binned from the oldest sampled alert to the newest. Taller bars mean more alerts in that part of the sample.",
-    "NAME_FILTER_NEEDS_LOCATION": "Enter your location and click Search to load objects, then filter by name.",
+    "NAME_FILTER_NEEDS_LOCATION": "Type a Locus ID above and click Search Sky Objects to search by name, or enter a location first to see all visible objects.",
     "NO_OBJECTS_DESCRIPTION": "No astronomical objects matching your criteria are visible tonight from your location. Try adjusting the magnitude threshold or removing object type filters.",
     "NO_OBJECTS_TITLE": "No Objects Found",
     "OBJECTS_VISIBLE_one": "{{count}} Object Visible Tonight",

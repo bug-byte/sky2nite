@@ -7,7 +7,7 @@ const mockNightWindow = jest.fn();
 const mockVisibility = jest.fn();
 
 jest.unstable_mockModule('../../services/antaresApi.js', () => ({
-  antaresApi: { fetchLociAtOffset: mockFetchLoci, fetchAlertActivityCurve: mockFetchAlertActivityCurve },
+  antaresApi: { fetchLociAtOffset: mockFetchLoci, fetchLociByName: mockFetchLoci, fetchAlertActivityCurve: mockFetchAlertActivityCurve },
 }));
 jest.unstable_mockModule('../../util/astronomy.js', () => ({
   calculateNightWindow: mockNightWindow,

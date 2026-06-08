@@ -52,6 +52,14 @@ type AntaresListResponse = {
   };
 }
 
+type AntaresSingleLocusResponse = {
+  data: AntaresLocusListing;
+  /**
+   * The single-locus endpoint uses type "locus" instead of "locus_listing"
+   * but the attributes are the same structure.
+   */
+}
+
 type AntaresAlertsResponse = {
   data: AntaresAlert[];
   links: {
@@ -290,6 +298,58 @@ export class AntaresApiClient {
     };
 
     return this.listLoci(params);
+  }
+
+  // Search ANTARES loci by name / locus ID.
+  //
+  // Strategy (two-tier):
+  //   1. Try an exact ID lookup via  GET /loci/{name}.
+  //      If the ANTARES API returns 200 we have our locus.
+  //   2. If that fails (the name is a partial match or does not exist),
+  //      fall back to fetching one batch and filtering client-side.
+  async fetchLociByName(
+    name: string,
+    limit: number = 50,
+  ): Promise<LociAtOffsetResult> {
+    const trimmed = name.trim();
+    if (!trimmed) {
+      return { loci: [], antaresTotalLoci: 0, hasNextPage: false };
+    }
+
+    // ── Tier 1 — exact ID lookup ──────────────────────────────────────
+    try {
+      const data = await this.get<AntaresSingleLocusResponse>(
+        `/loci/${encodeURIComponent(trimmed)}`,
+      );
+      const locus = this.listingToLocus(data.data);
+      return {
+        loci: [locus],
+        antaresTotalLoci: 1,
+        hasNextPage: false,
+      };
+    } catch {
+      // Not an exact match — fall through to Tier 2 below.
+    }
+
+    // ── Tier 2 — batch + server-side substring filter ─────────────────
+    const safeLimit = Math.max(1, Math.min(500, Math.floor(limit)));
+
+    // Fetch a reasonably large batch so we have a decent chance of finding
+    // objects whose id/label contains the search term.
+    const batchSize = Math.max(safeLimit, 500);
+    const batch = await this.fetchLociAtOffset(0, batchSize);
+    const q = trimmed.toLowerCase();
+
+    const matched = batch.loci.filter((l) =>
+      l.locus_id.toLowerCase().includes(q) ||
+      l.properties.ztf_object_id?.toLowerCase().includes(q),
+    );
+
+    return {
+      loci: matched,
+      antaresTotalLoci: matched.length,
+      hasNextPage: false,
+    };
   }
 
   // Get available tags for filtering

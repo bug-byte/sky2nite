@@ -11,5 +11,3 @@ Major Features
 Bugs / Investigation
 
 - Re-test windows setup script
-- Everything breaks when using search by name (use "ANT2020" as an example)
-- Cant search by name unless you enter lat/long

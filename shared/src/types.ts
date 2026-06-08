@@ -28,6 +28,8 @@ export type SearchFilters = {
   objectTypes?: string[];
   minAltitude?: number;
   minAlerts?: number;
+  /** Search for objects whose name / locus ID contains this string */
+  locusName?: string;
 }
 
 export type SearchPagination = {
@@ -35,7 +37,10 @@ export type SearchPagination = {
   pageSize?: number;
 }
 
-export type SearchRequest = LocationInput & {
+export type SearchRequest = {
+  latitude?: number;
+  longitude?: number;
+  date?: string; // ISO date string
   filters?: SearchFilters;
   pagination?: SearchPagination;
   includeAlertActivity?: boolean;

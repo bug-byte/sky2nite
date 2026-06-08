@@ -1,7 +1,7 @@
 import { antaresApi } from '../../services/antaresApi.js';
 import { calculateNightWindow, calculateVisibility, calculateBestObservationTime } from '../../util/astronomy.js';
 import getLogger from '../../util/getLogger.js';
-import type { SearchRequest, SearchResponse, SearchResponsePagination, VisibleObject } from 'shared/types.js';
+import type { SearchRequest, SearchResponse, VisibleObject } from 'shared/types.js';
 
 const log = getLogger('getTonightObjectsQuery');
 
@@ -9,41 +9,122 @@ const ANTARES_BATCH_SIZE = 500;
 const ALERT_ACTIVITY_SAMPLE_LIMIT = 12;
 const ALERT_ACTIVITY_CONCURRENCY = 4;
 
-export async function getTonightObjectsQuery(request: SearchRequest): Promise<SearchResponse> {
-  const { latitude, longitude, filters = {}, pagination = {} } = request;
+/** Format a Date as an ISO string, defaulting to now if falsy. */
+function toDate(input: string | null | undefined): Date {
+  const d = input ? new Date(input) : new Date();
+  if (isNaN(d.getTime())) throw new Error('Invalid date format.');
+  return d;
+}
 
-  if (typeof latitude !== 'number' || latitude < -90 || latitude > 90) {
-    throw new Error('Invalid latitude. Must be between -90 and 90.');
+/** Build a VisibleObject from a raw ANTARES locus (no visibility info yet). */
+function locusToVisibleObject(locus: Awaited<ReturnType<typeof antaresApi.fetchLociAtOffset>>['loci'][number]): VisibleObject {
+  const mag = locus.properties.brightest_alert_magnitude ?? locus.properties.newest_alert_magnitude ?? 99;
+  return {
+    locusId: locus.locus_id,
+    ra: locus.ra,
+    dec: locus.dec,
+    magnitude: mag,
+    numAlerts: locus.properties.num_alerts ?? 0,
+    tags: locus.tags,
+    visibilityWindow: { start: '', end: '', duration: 0 },
+    maxAltitude: 0,
+    objectIds: {
+      ztf: locus.properties.ztf_object_id,
+      lsst: locus.properties.lsst_dia_object_id,
+    },
+    antaresUrl: `https://antares.noirlab.edu/loci/${locus.locus_id}`,
+  };
+}
+
+// ─── Name-only search (no lat/lng required) ────────────────────────────────
+
+async function searchByName(
+  name: string,
+  latitude: number | undefined,
+  longitude: number | undefined,
+  observationDate: Date,
+  minAltitude: number,
+  safePageSize: number,
+): Promise<{ objects: VisibleObject[]; totalCount: number }> {
+  const batch = await antaresApi.fetchLociByName(name, safePageSize);
+  const objects: VisibleObject[] = [];
+
+  for (const locus of batch.loci) {
+    const obj = locusToVisibleObject(locus);
+
+    if (typeof latitude === 'number' && typeof longitude === 'number') {
+      // Location provided – calculate real visibility.
+      const { sunset, sunrise } = calculateNightWindow(latitude, longitude, observationDate);
+      const { isVisible, visibilityWindow, maxAltitude } = calculateVisibility(
+        locus.ra,
+        locus.dec,
+        latitude,
+        longitude,
+        sunset,
+        sunrise,
+        minAltitude,
+      );
+      if (!isVisible || !visibilityWindow) continue;
+
+      const { time: transitDate } = calculateBestObservationTime(
+        locus.ra,
+        locus.dec,
+        latitude,
+        longitude,
+        sunset,
+        sunrise,
+      );
+      obj.visibilityWindow = visibilityWindow;
+      obj.maxAltitude = maxAltitude;
+      obj.transitTime = transitDate.toISOString();
+    } else {
+      // No location – fill placeholder visibility so the object can be rendered.
+      // Use a generous 24 h window centred on the observation date.
+      const dayStart = new Date(observationDate);
+      dayStart.setHours(0, 0, 0, 0);
+      const dayEnd = new Date(dayStart);
+      dayEnd.setHours(23, 59, 59, 999);
+      obj.visibilityWindow = {
+        start: dayStart.toISOString(),
+        end: dayEnd.toISOString(),
+        duration: 24,
+      };
+      obj.maxAltitude = 90;
+    }
+
+    objects.push(obj);
   }
-  if (typeof longitude !== 'number' || longitude < -180 || longitude > 180) {
-    throw new Error('Invalid longitude. Must be between -180 and 180.');
-  }
 
-  const observationDate = request.date ? new Date(request.date) : new Date();
-  if (isNaN(observationDate.getTime())) {
-    throw new Error('Invalid date format.');
-  }
+  return { objects, totalCount: batch.antaresTotalLoci };
+}
 
-  const maxMagnitude = filters.maxMagnitude ?? 14;
-  const tags = filters.objectTypes;
-  const minAltitude = filters.minAltitude ?? 15;
-  const minAlerts = Math.max(0, Math.floor(filters.minAlerts ?? 5));
-  const safePageSize = Math.max(1, Math.min(500, Math.floor(typeof pagination.pageSize === 'number' ? pagination.pageSize : 500)));
-  const safeCursor = Math.max(0, Math.floor(typeof pagination.cursor === 'number' ? pagination.cursor : 0));
-  const includeAlertActivity = request.includeAlertActivity === true;
+// ─── Normal location-based search ──────────────────────────────────────────
 
-  log.info(`Searching for objects visible from (${latitude}, ${longitude}) on ${observationDate.toISOString()}`);
-
+async function searchByLocation(
+  latitude: number,
+  longitude: number,
+  observationDate: Date,
+  maxMagnitude: number,
+  tags: string[] | undefined,
+  minAltitude: number,
+  minAlerts: number,
+  safePageSize: number,
+  safeCursor: number,
+  includeAlertActivity: boolean,
+): Promise<{
+  objects: VisibleObject[];
+  sunset: Date;
+  sunrise: Date;
+  antaresTotalLoci: number;
+  nextCursor: number | null;
+}> {
   const { sunset, sunrise } = calculateNightWindow(latitude, longitude, observationDate);
   log.info(`Night window: ${sunset.toISOString()} to ${sunrise.toISOString()}`);
-
-  log.info(`Querying ANTARES for objects with magnitude <= ${maxMagnitude}, alerts >= ${minAlerts}, starting at cursor ${safeCursor}`);
 
   const visibleObjects: VisibleObject[] = [];
   let antaresTotalLoci = 0;
   let hasMoreFromAntares = true;
   let antaresOffset = safeCursor;
-  // nextCursor tracks the exact ANTARES offset the next page should start from.
   let nextCursor: number | null = null;
 
   outer: while (visibleObjects.length < safePageSize && hasMoreFromAntares) {
@@ -103,32 +184,21 @@ export async function getTonightObjectsQuery(request: SearchRequest): Promise<Se
         });
 
         if (visibleObjects.length >= safePageSize) {
-          // Record exact offset of the item after the one that filled the page.
           nextCursor = antaresOffset + i + 1;
           break outer;
         }
       }
     }
 
-    // Finished processing this entire batch — advance to the next.
     antaresOffset += batch.loci.length;
   }
 
-  // If we exhausted ANTARES before filling the page, there is no next page.
   if (nextCursor === null) {
     nextCursor = hasMoreFromAntares ? antaresOffset : null;
     if (!hasMoreFromAntares) nextCursor = null;
   }
 
-  const hasNextPage = nextCursor !== null;
-
-  // Sort by transit time ascending — objects that peak earliest in the night come first,
-  // giving observers a chronological session plan.
-  visibleObjects.sort((a, b) => {
-    if (a.transitTime && b.transitTime) return a.transitTime.localeCompare(b.transitTime);
-    return b.visibilityWindow.duration - a.visibilityWindow.duration;
-  });
-
+  // Enrich with alert activity curves if requested
   if (includeAlertActivity && visibleObjects.length > 0) {
     const enrichedObjects: VisibleObject[] = [];
 
@@ -157,22 +227,110 @@ export async function getTonightObjectsQuery(request: SearchRequest): Promise<Se
     visibleObjects.splice(0, visibleObjects.length, ...enrichedObjects);
   }
 
-  log.info(`${visibleObjects.length} objects are visible tonight (cursor ${safeCursor} → next ${nextCursor ?? 'end'})`);
+  return { objects: visibleObjects, sunset, sunrise, antaresTotalLoci, nextCursor };
+}
+
+// ─── Main entry point ──────────────────────────────────────────────────────
+
+export async function getTonightObjectsQuery(request: SearchRequest): Promise<SearchResponse> {
+  const { latitude, longitude, filters = {}, pagination = {} } = request;
+  const locusName = filters.locusName?.trim();
+  const observationDate = toDate(request.date);
+
+  const maxMagnitude = filters.maxMagnitude ?? 14;
+  const tags = filters.objectTypes;
+  const minAltitude = filters.minAltitude ?? 15;
+  const minAlerts = Math.max(0, Math.floor(filters.minAlerts ?? 5));
+  const safePageSize = Math.max(1, Math.min(500, Math.floor(typeof pagination.pageSize === 'number' ? pagination.pageSize : 500)));
+  const safeCursor = Math.max(0, Math.floor(typeof pagination.cursor === 'number' ? pagination.cursor : 0));
+  const includeAlertActivity = request.includeAlertActivity === true;
+
+  // ── Name-search mode (lat/lng optional) ────────────────────────────────
+  if (locusName) {
+    // Validate lat/lng only if they were actually provided
+    if (latitude !== undefined) {
+      if (typeof latitude !== 'number' || latitude < -90 || latitude > 90) {
+        throw new Error('Invalid latitude. Must be between -90 and 90.');
+      }
+    }
+    if (longitude !== undefined) {
+      if (typeof longitude !== 'number' || longitude < -180 || longitude > 180) {
+        throw new Error('Invalid longitude. Must be between -180 and 180.');
+      }
+    }
+
+    log.info(`Searching by name "${locusName}" (lat=${latitude}, lng=${longitude})`);
+
+    const { objects, totalCount } = await searchByName(
+      locusName,
+      latitude,
+      longitude,
+      observationDate,
+      minAltitude,
+      safePageSize,
+    );
+
+    const responseLat = typeof latitude === 'number' ? latitude : 0;
+    const responseLng = typeof longitude === 'number' ? longitude : 0;
+
+    return {
+      location: { latitude: responseLat, longitude: responseLng },
+      date: observationDate.toISOString(),
+      nightWindow: {
+        sunset: observationDate.toISOString(),
+        sunrise: observationDate.toISOString(),
+      },
+      objects,
+      count: objects.length,
+      pagination: {
+        pageSize: safePageSize,
+        hasNextPage: false,
+        nextCursor: null,
+        antaresTotalLoci: totalCount,
+      },
+    };
+  }
+
+  // ── Standard location-based search ─────────────────────────────────────
+  if (typeof latitude !== 'number' || latitude < -90 || latitude > 90) {
+    throw new Error('Invalid latitude. Must be between -90 and 90.');
+  }
+  if (typeof longitude !== 'number' || longitude < -180 || longitude > 180) {
+    throw new Error('Invalid longitude. Must be between -180 and 180.');
+  }
+
+  log.info(`Searching for objects visible from (${latitude}, ${longitude}) on ${observationDate.toISOString()}`);
+  log.info(`Querying ANTARES for objects with magnitude <= ${maxMagnitude}, alerts >= ${minAlerts}, starting at cursor ${safeCursor}`);
+
+  const result = await searchByLocation(
+    latitude,
+    longitude,
+    observationDate,
+    maxMagnitude,
+    tags,
+    minAltitude,
+    minAlerts,
+    safePageSize,
+    safeCursor,
+    includeAlertActivity,
+  );
+
+  log.info(`${result.objects.length} objects are visible tonight (cursor ${safeCursor} → next ${result.nextCursor ?? 'end'})`);
 
   return {
     location: { latitude, longitude },
     date: observationDate.toISOString(),
     nightWindow: {
-      sunset: sunset.toISOString(),
-      sunrise: sunrise.toISOString(),
+      sunset: result.sunset.toISOString(),
+      sunrise: result.sunrise.toISOString(),
     },
-    objects: visibleObjects,
-    count: visibleObjects.length,
+    objects: result.objects,
+    count: result.objects.length,
     pagination: {
       pageSize: safePageSize,
-      hasNextPage,
-      nextCursor,
-      antaresTotalLoci,
+      hasNextPage: result.nextCursor !== null,
+      nextCursor: result.nextCursor,
+      antaresTotalLoci: result.antaresTotalLoci,
     },
   };
 }

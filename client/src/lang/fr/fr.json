@@ -23,7 +23,8 @@
     "CANCEL": "Annuler",
     "CLOSE": "Fermer",
     "MY_NOTES": "Mes notes",
-    "SAVE": "Enregistrer"
+    "SAVE": "Enregistrer",
+    "SEARCH": "Rechercher"
   },
   "ERROR": {
     "GEOLOCATION_NOT_SUPPORTED": "La géolocalisation n'est pas prise en charge par votre navigateur",
@@ -118,7 +119,7 @@
     "PRESET_NAME": "Nom du préréglage",
     "PRESET_NAME_HELP": "Donnez un nom mémorable à cette combinaison (par ex. « Supernovae seulement »)",
     "NO_PRESETS": "Aucun préréglage de filtre enregistré pour le moment.",
-    "NO_PRESETS_HINT": "Ajustez les filtres ci-dessus, puis cliquez sur Enregistrer le préréglage pour mémoriser cette combinaison et y accéder en un clic.",
+    "NO_PRESETS_HINT": "Ajustez les filtres ci-dessous, puis cliquez sur Enregistrer le préréglage pour mémoriser cette combinaison et y accéder en un clic.",
     "ADVANCED_FILTERS": "Filtres avancés",
     "FILTER_PRESETS_HELP": "Appliquez un ensemble de filtres enregistrés en un clic, ou sauvegardez vos réglages actuels comme nouveau préréglage.",
     "VISIBILITY_HELP": "Afficher uniquement les objets visibles pendant cette plage horaire. Prend en charge les observations nocturnes (p. ex. 23 h 00 – 3 h 00)."
@@ -141,14 +142,14 @@
     "ALTITUDE_HELP": "Les objets doivent atteindre cette altitude au-dessus de l'horizon pour apparaître dans les résultats. Des valeurs plus élevées réduisent les interférences atmosphériques.",
     "MAGNITUDE_HELP": "Les objets plus brillants ont des valeurs de magnitude plus faibles. La plupart des télescopes grand public peuvent voir des objets jusqu'à la magnitude 12-14 dans de bonnes conditions.",
     "MIN_ALERTS_HELP": "Saisissez un nombre minimal d'alertes ANTARES. Des valeurs plus élevées mettent en avant les détections répétées et les transitoires en cours ; la valeur par défaut est 5.",
-    "LOCUS_ID_SEARCH_HELP": "Recherchez un ID de locus exact ou n'importe quelle partie du nom.",
+    "LOCUS_ID_SEARCH_HELP": "Recherchez par ID de locus exact (ex. ANT2021y65ce). La recherche partielle est limitée aux objets les plus brillants.",
     "MORE_TAGS": "+{{count}} de plus",
     "ALERT_ACTIVITY_SINGLE": "{{count}} alerte",
     "ALERT_ACTIVITY": "{{count}} alertes",
     "ALERT_ACTIVITY_TOOLTIP": "Des nombres d'alertes plus élevés sont un indicateur approximatif de cohérence sur plusieurs nuits et d'activité.",
     "CLASSIFICATION_RARITY_HINT": "Les classifications rares ou particulièrement intéressantes sont mises en évidence dans le tableau.",
     "ALERT_ACTIVITY_CURVE_TOOLTIP": "Cette courbe montre une chronologie récente des alertes pour le locus, regroupée de l'alerte échantillonnée la plus ancienne à la plus récente. Des barres plus hautes indiquent davantage d'alertes dans cette partie de l'échantillon.",
-    "NAME_FILTER_NEEDS_LOCATION": "Entrez votre position et cliquez sur Rechercher pour charger les objets, puis filtrez par nom.",
+    "NAME_FILTER_NEEDS_LOCATION": "Saisissez un ID de locus ci-dessus et cliquez sur Rechercher pour chercher par nom, ou entrez d'abord une position pour voir tous les objets visibles.",
     "NO_OBJECTS_DESCRIPTION": "Aucun objet astronomique correspondant à vos critères n'est visible ce soir depuis votre emplacement. Essayez d'ajuster le seuil de magnitude ou de supprimer les filtres de type d'objet.",
     "NO_OBJECTS_TITLE": "Aucun objet trouvé",
     "OBJECTS_VISIBLE_one": "{{count}} objet visible ce soir",
