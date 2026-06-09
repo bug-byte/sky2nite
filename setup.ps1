@@ -152,6 +152,7 @@ Pop-Location
 if ($sharedResult -ne 0) { Write-Fail "Failed to build shared types." }
 
 Write-Info "Building server..."
+if (Test-Path 'server\dist') { Remove-Item -Recurse -Force 'server\dist' }
 npm run build --prefix server
 if ($LASTEXITCODE -ne 0) { Write-Fail "Failed to build server." }
 

@@ -20,8 +20,9 @@ WORKDIR /app/server
 COPY server/package*.json ./
 RUN npm ci
 
-# Copy shared source so `tsc --build` can compile it first
+# Copy shared and build it first so the server tsc project reference resolves
 COPY shared/ /app/shared/
+RUN node node_modules/typescript/bin/tsc --build --force /app/shared/tsconfig.json
 
 COPY server/ ./
 RUN npm run build
@@ -30,15 +31,16 @@ RUN npm run build
 FROM node:22-alpine AS production
 WORKDIR /app
 
-# Install only production dependencies
+# Install only production dependencies (includes the shared file: symlink)
 COPY server/package*.json ./
+COPY shared/ /shared/
 RUN npm ci --omit=dev
 
 # Copy compiled server
 COPY --from=server-builder /app/server/dist ./dist
 
-# Copy compiled shared library so relative imports (e.g. `shared/src/userSettings.js`) resolve
-COPY --from=server-builder /app/shared/dist /shared/src
+# Copy compiled shared library into the location node_modules/shared points to
+COPY --from=server-builder /app/shared/dist /shared/dist
 
 # Copy built client into the directory the server will serve
 COPY --from=client-builder /app/client/dist ./public
