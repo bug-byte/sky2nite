@@ -26,31 +26,32 @@ jobs:
       - name: Install SSH key
         run: |
           mkdir -p /home/gitea/.ssh
-          cat >> /home/gitea/.ssh/config <<'SSHCONF'
-          Host deploy-vm
-            HostName ${{ secrets.DEPLOY_HOST }}
-            User ${{ secrets.DEPLOY_USER || 'deploy' }}
-            IdentityFile /home/gitea/.ssh/deploy_key
-            StrictHostKeyChecking accept-new
-          SSHCONF
+          { echo 'Host deploy-vm'; \
+            echo "  HostName ${{ secrets.DEPLOY_HOST }}"; \
+            echo "  User ${{ secrets.DEPLOY_USER || 'deploy' }}"; \
+            echo '  IdentityFile /home/gitea/.ssh/deploy_key'; \
+            echo '  StrictHostKeyChecking accept-new'; } \
+            > /home/gitea/.ssh/config
           echo "${{ secrets.DEPLOY_SSH_KEY }}" > /home/gitea/.ssh/deploy_key
           chmod 600 /home/gitea/.ssh/deploy_key
 
-      - name: Sync repository to VM
+      - name: Pull latest code on VM and restart containers
         run: |
-          rsync -avz --delete \
-            --exclude='.git/' \
-            --exclude='.gitea/' \
-            --exclude='node_modules/' \
-            --exclude='dist/' \
-            --exclude='*.log' \
-            --exclude='coverage/' \
-            ./ deploy-vm:/home/${{ secrets.DEPLOY_USER || 'deploy' }}/sky2nite/
+          # GITHUB_REPOSITORY is set by Gitea Actions (e.g. "owner/repo")
+          REPO_SLUG="${{ github.repository }}"
 
-      - name: Build and restart containers
-        run: |
-          ssh deploy-vm << 'EOF'
+          ssh deploy-vm << DEPLOYSCRIPT
             set -e
+            CLONE_URL="http://gitea:3000/$REPO_SLUG.git"
+
+            if [ -d /home/"$USER"/sky2nite/.git ]; then
+              cd /home/"$USER"/sky2nite
+              git pull "$CLONE_URL" development
+            else
+              mkdir -p /home/"$USER"/sky2nite
+              git clone --branch development "$CLONE_URL" /home/"$USER"/sky2nite
+            fi
+
             cd /home/"$USER"/sky2nite
             echo "--- Pulling PostgreSQL image (if needed) ---"
             docker compose pull db
@@ -59,4 +60,4 @@ jobs:
             echo "--- Cleaning up unused images ---"
             docker image prune -f
             echo "--- Deployment complete ---"
-          EOF
+          DEPLOYSCRIPT
