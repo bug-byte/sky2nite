@@ -36,32 +36,36 @@ jobs:
           echo "${{ secrets.DEPLOY_SSH_KEY }}" > /home/gitea/.ssh/deploy_key
           chmod 600 /home/gitea/.ssh/deploy_key
 
+      - name: Test SSH connection to VM
+        run: |
+          ssh -T deploy-vm 'echo "SSH OK — hostname: $(hostname) — user: $(whoami)"'
+
       - name: Clone or pull repository on VM
         run: |
           REPO_SLUG="${{ github.repository }}"
           CLONE_URL="http://gitea:${{ secrets.GT_TOKEN }}@git.devinmajor.com/$REPO_SLUG.git"
 
-          ssh -T deploy-vm << GITSCRIPT
+          ssh -T deploy-vm "CLONE_URL=$CLONE_URL" bash << 'GITSCRIPT'
             set -e
+            echo "=== Checking for git ==="
+            command -v git && echo "git found: $(git --version)" || { echo "installing git..."; sudo apt-get update -qq && sudo apt-get install -y -qq git; }
 
-            # Ensure git is installed
-            if ! command -v git &>/dev/null; then
-              echo "Git not found, installing..."
-              sudo apt-get update -qq && sudo apt-get install -y -qq git
-            fi
+            echo "=== Connecting to Gitea ==="
+            curl -sI --connect-timeout 5 "http://git.devinmajor.com" | head -3 || echo "curl failed"
 
-            echo "Repository URL: $CLONE_URL"
+            echo "=== Repository URL (token hidden) ==="
+            echo "${CLONE_URL/gitea:*/gitea:***@}"
 
             if [ -d /home/"$USER"/sky2nite/.git ]; then
               cd /home/"$USER"/sky2nite
-              echo "Existing repo found — pulling latest..."
-              GIT_TERMINAL_PROMPT=0 git pull "$CLONE_URL" development
+              echo "=== Existing repo found — pulling ==="
+              GIT_TERMINAL_PROMPT=0 timeout 30 git pull "$CLONE_URL" development
             else
-              echo "Fresh clone..."
+              echo "=== Fresh clone ==="
               mkdir -p /home/"$USER"/sky2nite
-              GIT_TERMINAL_PROMPT=0 git clone --branch development "$CLONE_URL" /home/"$USER"/sky2nite
+              GIT_TERMINAL_PROMPT=0 timeout 30 git clone --branch development "$CLONE_URL" /home/"$USER"/sky2nite
             fi
-            echo "Git operation completed."
+            echo "=== Git operation completed ==="
           GITSCRIPT
 
       - name: Pull PostgreSQL image
