@@ -1,13 +1,8 @@
 Ops
 
-- Host on homelab
-- Create CI/CD pipeline to auto-deploy master branch to homelab when changes are made
+- Fix SSL issue with new sky2nite subdomain on homelab
 
 Major Features
 
 - Add a "buy me a coffee" paypal link thing
 - Magnitude change alert highlight saved observation and/or send notification when an object's reported magnitude changes significantly between nights
-
-Bugs / Investigation
-
-- Re-test windows setup script
