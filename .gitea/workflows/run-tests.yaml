@@ -46,17 +46,3 @@ jobs:
         run: |
           set -o pipefail
           npm test -- --ci --coverage 2>&1 | tee jest-integration.log
-
-      - name: Upload Jest results
-        if: always()
-        uses: actions/upload-artifact@v3
-        with:
-          name: jest-integration-results
-          path: server/jest-integration.log
-
-      - name: Upload Jest coverage
-        if: always()
-        uses: actions/upload-artifact@v3
-        with:
-          name: jest-integration-coverage
-          path: server/coverage

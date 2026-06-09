@@ -79,7 +79,6 @@ else
   warn "Quickstart with Docker:  docker run -d --name sky2nite-db -e POSTGRES_DB=sky2nite -e POSTGRES_USER=sky2nite -e POSTGRES_PASSWORD=sky2nite -p 5432:5432 postgres:17-alpine"
 fi
 
-
 # ─── Google Maps API key ─────────────────────────────────────────────────────
 _gmk=$(grep '^VITE_GOOGLE_MAPS_API_KEY=' server/.env 2>/dev/null | cut -d= -f2- || true)
 if [ -z "$_gmk" ] || [ "$_gmk" = "your_api_key_here" ]; then
