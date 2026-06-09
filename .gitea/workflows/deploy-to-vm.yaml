@@ -35,15 +35,13 @@ jobs:
           echo "${{ secrets.DEPLOY_SSH_KEY }}" > /home/gitea/.ssh/deploy_key
           chmod 600 /home/gitea/.ssh/deploy_key
 
-      - name: Pull latest code on VM and restart containers
+      - name: Clone or pull repository on VM
         run: |
-          # GITHUB_REPOSITORY is set by Gitea Actions (e.g. "owner/repo")
           REPO_SLUG="${{ github.repository }}"
+          CLONE_URL="http://${{ secrets.DEPLOY_HOST }}:3000/$REPO_SLUG.git"
 
-          ssh -T deploy-vm << DEPLOYSCRIPT
+          ssh -T deploy-vm << GITSCRIPT
             set -e
-            CLONE_URL="http://${{ secrets.DEPLOY_HOST }}:3000/$REPO_SLUG.git"
-
             if [ -d /home/"$USER"/sky2nite/.git ]; then
               cd /home/"$USER"/sky2nite
               git pull "$CLONE_URL" development
@@ -51,13 +49,16 @@ jobs:
               mkdir -p /home/"$USER"/sky2nite
               git clone --branch development "$CLONE_URL" /home/"$USER"/sky2nite
             fi
+          GITSCRIPT
 
-            cd /home/"$USER"/sky2nite
-            echo "--- Pulling PostgreSQL image (if needed) ---"
-            docker compose pull db
-            echo "--- Building and starting services ---"
-            docker compose up --build -d
-            echo "--- Cleaning up unused images ---"
-            docker image prune -f
-            echo "--- Deployment complete ---"
-          DEPLOYSCRIPT
+      - name: Pull PostgreSQL image
+        run: |
+          ssh -T deploy-vm 'docker compose -f $HOME/sky2nite/docker-compose.yml pull db'
+
+      - name: Build and restart application containers
+        run: |
+          ssh -T deploy-vm 'docker compose -f $HOME/sky2nite/docker-compose.yml up --build -d'
+
+      - name: Clean up unused Docker images
+        run: |
+          ssh -T deploy-vm 'docker image prune -f'
