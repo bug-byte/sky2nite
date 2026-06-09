@@ -38,17 +38,29 @@ jobs:
       - name: Clone or pull repository on VM
         run: |
           REPO_SLUG="${{ github.repository }}"
-          CLONE_URL="http://${{ secrets.DEPLOY_HOST }}:3000/$REPO_SLUG.git"
+          CLONE_URL="http://git.devinmajor.com/$REPO_SLUG.git"
 
           ssh -T deploy-vm << GITSCRIPT
             set -e
+
+            # Ensure git is installed
+            if ! command -v git &>/dev/null; then
+              echo "Git not found, installing..."
+              sudo apt-get update -qq && sudo apt-get install -y -qq git
+            fi
+
+            echo "Repository URL: $CLONE_URL"
+
             if [ -d /home/"$USER"/sky2nite/.git ]; then
               cd /home/"$USER"/sky2nite
-              git pull "$CLONE_URL" development
+              echo "Existing repo found — pulling latest..."
+              GIT_TERMINAL_PROMPT=0 git pull "$CLONE_URL" development
             else
+              echo "Fresh clone..."
               mkdir -p /home/"$USER"/sky2nite
-              git clone --branch development "$CLONE_URL" /home/"$USER"/sky2nite
+              GIT_TERMINAL_PROMPT=0 git clone --branch development "$CLONE_URL" /home/"$USER"/sky2nite
             fi
+            echo "Git operation completed."
           GITSCRIPT
 
       - name: Pull PostgreSQL image
