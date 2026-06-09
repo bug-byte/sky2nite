@@ -7,6 +7,7 @@
 #   DEPLOY_SSH_KEY – SSH private key for password-less authentication
 #   DEPLOY_USER   – SSH username on the target VM (default: deploy)
 #   DEPLOY_HOST   – IP or hostname of the target VM (e.g. 192.168.0.40)
+#   GT_TOKEN   – Gitea access token (Settings → Applications → Access Tokens)
 
 name: Deploy to Development VM
 
@@ -38,7 +39,7 @@ jobs:
       - name: Clone or pull repository on VM
         run: |
           REPO_SLUG="${{ github.repository }}"
-          CLONE_URL="http://git.devinmajor.com/$REPO_SLUG.git"
+          CLONE_URL="http://gitea:${{ secrets.GT_TOKEN }}@git.devinmajor.com/$REPO_SLUG.git"
 
           ssh -T deploy-vm << GITSCRIPT
             set -e
