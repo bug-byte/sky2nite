@@ -40,9 +40,9 @@ jobs:
           # GITHUB_REPOSITORY is set by Gitea Actions (e.g. "owner/repo")
           REPO_SLUG="${{ github.repository }}"
 
-          ssh deploy-vm << DEPLOYSCRIPT
+          ssh -T deploy-vm << DEPLOYSCRIPT
             set -e
-            CLONE_URL="http://gitea:3000/$REPO_SLUG.git"
+            CLONE_URL="http://${{ secrets.DEPLOY_HOST }}:3000/$REPO_SLUG.git"
 
             if [ -d /home/"$USER"/sky2nite/.git ]; then
               cd /home/"$USER"/sky2nite
