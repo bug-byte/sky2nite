@@ -38,6 +38,8 @@ export const useSaveObservation = () => {
           objectIds: body.objectIds ?? {},
           antaresUrl: body.antaresUrl,
           notes: body.notes ?? '',
+          status: 'planned',
+          rating: null,
           savedAt: new Date().toISOString(),
         };
         return [placeholder, ...old];
