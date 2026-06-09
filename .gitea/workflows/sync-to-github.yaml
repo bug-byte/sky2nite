@@ -1,0 +1,38 @@
+# Gitea Actions – Mirror repository to GitHub
+#
+# Prerequisites (set as repository Secrets in Gitea → Settings → Secrets):
+#   GH_PAT   – GitHub Personal Access Token with `repo` scope
+#   GH_REPO  – GitHub repository (e.g. "your-username/sky2nite")
+
+name: Sync to GitHub
+on:
+  push:
+    branches:
+      - master
+      - development
+
+jobs:
+  mirror-to-github:
+    runs-on: self-hosted
+
+    steps:
+      - name: Checkout repository (all history, all tags)
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Verify GitHub secrets are set
+        run: |
+          if [ -z "${{ secrets.GH_PAT }}" ]; then
+            echo "ERROR: GH_PAT secret is not set" && exit 1
+          fi
+          if [ -z "${{ secrets.GH_REPO }}" ]; then
+            echo "ERROR: GH_REPO secret is not set" && exit 1
+          fi
+          echo "All GitHub secrets are set."
+
+      - name: Push mirror to GitHub
+        run: |
+          git remote add github \
+            "https://x-access-token:${{ secrets.GH_PAT }}@github.com/${{ secrets.GH_REPO }}.git"
+          git push --mirror github

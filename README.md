@@ -55,7 +55,7 @@ Key variables:
 
 | Variable | Description |
 |---|---|
-| `PORT` | Port the server listens on (default `3000`) |
+| `PORT` | Port the server listens on (default `3001`) |
 | `DATABASE_URL` | PostgreSQL connection string |
 | `JWT_SECRET` | Secret used to sign auth tokens (required) |
 | `AUTH_TOKEN_TTL` | Login token lifetime (default `7d`) |
@@ -86,7 +86,7 @@ docker compose --env-file server/.env up --build
 
 The `--env-file server/.env` flag makes your `VITE_GOOGLE_MAPS_API_KEY` (and any other `VITE_*` vars) available to the build step so Vite can bake them into the client bundle.
 
-The app is available at **http://localhost:3000**.
+The app is available at **http://localhost:3001**.
 
 On first launch, Sky2nite shows a **first-time setup** form to create the initial user account in PostgreSQL. After setup, users authenticate with the login form before accessing object search endpoints.
 
@@ -140,7 +140,7 @@ The script will:
 cd server && NODE_ENV=production node dist/index.js
 ```
 
-The app is available at **http://localhost:3000**.
+The app is available at **http://localhost:3001**.
 
 On first launch, Sky2nite shows a **first-time setup** form to create the initial user account in PostgreSQL. After setup, users authenticate with the login form before accessing object search endpoints.
 
@@ -178,7 +178,7 @@ The script will:
 cd server; $env:NODE_ENV = 'production'; node dist/index.js
 ```
 
-The app is available at **http://localhost:3000**.
+The app is available at **http://localhost:3001**.
 
 On first launch, Sky2nite shows a **first-time setup** form to create the initial user account in PostgreSQL. After setup, users authenticate with the login form before accessing object search endpoints.
 
@@ -227,7 +227,7 @@ cd server && npm install && cd ../client && npm install
 **4. Start the server and client**
 
 ```bash
-# Terminal 1 — Express API server (http://localhost:3000)
+# Terminal 1 — Express API server (http://localhost:3001)
 cd server && npm run dev
 
 # Terminal 2 — Vite dev server (http://localhost:5173)

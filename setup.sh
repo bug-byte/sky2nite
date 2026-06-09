@@ -179,4 +179,4 @@ else
 fi
 
 # ─── Done ─────────────────────────────────────────────────────────────────────
-ok "Setup complete! The app will be available at http://localhost:3000"
+ok "Setup complete! The app will be available at http://localhost:3001"

@@ -178,4 +178,4 @@ if ($LASTEXITCODE -ne 0) {
 }
 
 # ─── Done ─────────────────────────────────────────────────────────────────────
-Write-Ok "Setup complete! The app will be available at http://localhost:3000"
+Write-Ok "Setup complete! The app will be available at http://localhost:3001"

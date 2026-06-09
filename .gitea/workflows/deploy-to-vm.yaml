@@ -1,0 +1,62 @@
+# Gitea Actions – Deploy to development VM via Docker Compose
+#
+# Triggers on every push to the `development` branch, syncs the repository
+# to the target VM, then rebuilds and restarts the containers.
+#
+# Prerequisites (set as repository Secrets in Gitea → Settings → Secrets):
+#   DEPLOY_SSH_KEY – SSH private key for password-less authentication
+#   DEPLOY_USER   – SSH username on the target VM (default: deploy)
+#   DEPLOY_HOST   – IP or hostname of the target VM (e.g. 192.168.0.40)
+
+name: Deploy to Development VM
+
+on:
+  push:
+    branches:
+      - development
+
+jobs:
+  deploy:
+    runs-on: self-hosted
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install SSH key
+        run: |
+          mkdir -p ~/.ssh
+          cat >> ~/.ssh/config <<'SSHCONF'
+          Host deploy-vm
+            HostName ${{ secrets.DEPLOY_HOST }}
+            User ${{ secrets.DEPLOY_USER || 'deploy' }}
+            IdentityFile ~/.ssh/deploy_key
+            StrictHostKeyChecking accept-new
+          SSHCONF
+          echo "${{ secrets.DEPLOY_SSH_KEY }}" > ~/.ssh/deploy_key
+          chmod 600 ~/.ssh/deploy_key
+
+      - name: Sync repository to VM
+        run: |
+          rsync -avz --delete \
+            --exclude='.git/' \
+            --exclude='.gitea/' \
+            --exclude='node_modules/' \
+            --exclude='dist/' \
+            --exclude='*.log' \
+            --exclude='coverage/' \
+            ./ deploy-vm:/home/${{ secrets.DEPLOY_USER || 'deploy' }}/sky2nite/
+
+      - name: Build and restart containers
+        run: |
+          ssh deploy-vm << 'EOF'
+            set -e
+            cd /home/"$USER"/sky2nite
+            echo "--- Pulling PostgreSQL image (if needed) ---"
+            docker compose pull db
+            echo "--- Building and starting services ---"
+            docker compose up --build -d
+            echo "--- Cleaning up unused images ---"
+            docker image prune -f
+            echo "--- Deployment complete ---"
+          EOF

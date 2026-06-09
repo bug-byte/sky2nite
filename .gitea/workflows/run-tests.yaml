@@ -1,0 +1,62 @@
+name: Server Tests
+
+on:
+  push:
+    branches:
+      - '**'
+
+jobs:
+  jest-integration:
+    name: Jest – Integration Tests
+    runs-on: self-hosted
+
+    defaults:
+      run:
+        working-directory: server
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+          cache-dependency-path: server/package-lock.json
+
+      - name: Install dependencies
+        env:
+          NPM_CONFIG_CACHE: /tmp/npm-cache
+        run: npm ci --prefer-offline
+
+      - name: Write test environment file
+        run: |
+          cat > environment.test.env <<'EOF'
+          NODE_ENV=test
+          JWT_SECRET=${{ secrets.JWT_SECRET || 'ci-test-secret-not-for-production' }}
+          DATABASE_URL=postgresql://unused/test
+          NO_EMAIL_MODE=true
+          EOF
+
+      - name: Run Jest integration tests
+        env:
+          TEST_ENV_FILE: ./environment.test.env
+          NODE_ENV: test
+        run: |
+          set -o pipefail
+          npm test -- --ci --coverage 2>&1 | tee jest-integration.log
+
+      - name: Upload Jest results
+        if: always()
+        uses: actions/upload-artifact@v3
+        with:
+          name: jest-integration-results
+          path: server/jest-integration.log
+
+      - name: Upload Jest coverage
+        if: always()
+        uses: actions/upload-artifact@v3
+        with:
+          name: jest-integration-coverage
+          path: server/coverage

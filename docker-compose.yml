@@ -22,13 +22,13 @@ services:
         # For local dev, set VITE_GOOGLE_MAPS_API_KEY in client/.env instead.
         VITE_GOOGLE_MAPS_API_KEY: ${VITE_GOOGLE_MAPS_API_KEY:-}
     ports:
-      - "3000:3000"
+      - "3001:3001"
     depends_on:
       db:
         condition: service_healthy
     environment:
       NODE_ENV: production
-      PORT: 3000
+      PORT: 3001
       JWT_SECRET: ${JWT_SECRET:-change_me_in_production}
       AUTH_TOKEN_TTL: ${AUTH_TOKEN_TTL:-7d}
       # PostgreSQL — change credentials/host if using your own existing instance
