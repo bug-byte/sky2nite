@@ -37,6 +37,9 @@ RUN npm ci --omit=dev
 # Copy compiled server
 COPY --from=server-builder /app/server/dist ./dist
 
+# Copy compiled shared library so relative imports (e.g. `shared/src/userSettings.js`) resolve
+COPY --from=server-builder /app/shared/dist /shared/src
+
 # Copy built client into the directory the server will serve
 COPY --from=client-builder /app/client/dist ./public
 
