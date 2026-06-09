@@ -30,6 +30,7 @@ app.use(helmet({
     directives: {
       ...helmet.contentSecurityPolicy.getDefaultDirectives(),
       'img-src': ["'self'", 'data:', 'https://alasky.cds.unistra.fr'],
+      'upgrade-insecure-requests': null, // disable — breaks LAN/dev access over plain HTTP
     },
   },
 }));

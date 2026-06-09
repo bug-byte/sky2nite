@@ -37,7 +37,7 @@ services:
       ANTARES_API_BASE_URL: https://api.antares.noirlab.edu/v1
       CACHE_TTL_SECONDS: 3600
       # Optional: uncomment to restrict CORS to a specific origin
-      # FRONTEND_URL: https://your-domain.com
+      FRONTEND_URL: ${FRONTEND_URL:-}
 
 volumes:
   pgdata:
