@@ -1,6 +1,6 @@
 import pool from '../../services/db.js';
 import { getSettingsQuery } from './getSettingsQuery.js';
-import type { UserSettings } from '../../../../shared/src/types.js';
+import type { UserSettings } from 'shared/types.js';
 
 export async function updateSettingsCommand(
   userId: number,

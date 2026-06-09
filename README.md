@@ -112,7 +112,7 @@ docker compose down -v
 
 ## Setup — Linux / macOS (host)
 
-Requires Node.js ≥ 20.19 and PostgreSQL installed locally.
+Requires Node.js ≥ 20.19. PostgreSQL can be installed locally or provided via Docker — the setup script handles both.
 
 **1. Configure environment**
 
@@ -130,9 +130,10 @@ chmod +x setup.sh
 
 The script will:
 - Verify your Node.js version
-- Create the PostgreSQL database (if `psql` is available)
+- Create the PostgreSQL database — if `psql` is found it creates the database automatically; if not but Docker is available it starts a `sky2nite-db` container on port 5432; otherwise it prints manual instructions
 - Install dependencies and build both client and server
 - Copy the client bundle into `server/public`
+- Install and start a systemd service (Linux only) so the app restarts on boot
 
 **3. Start the application**
 
@@ -148,7 +149,7 @@ On first launch, Sky2nite shows a **first-time setup** form to create the initia
 
 ## Setup — Windows (host)
 
-Requires Node.js ≥ 20.19 and PostgreSQL installed locally.
+Requires Node.js ≥ 20.19. PostgreSQL can be installed locally or provided via Docker — the setup script handles both.
 
 **1. Configure environment**
 
@@ -159,7 +160,7 @@ Copy-Item server\.env.example server\.env
 
 **2. Run the setup script**
 
-Open PowerShell as your normal user (no elevation required) and run:
+Open PowerShell and run:
 
 ```powershell
 Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass
@@ -168,9 +169,21 @@ Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass
 
 The script will:
 - Verify your Node.js version
-- Create the PostgreSQL database (if `psql` is available)
+- Create the PostgreSQL database — if `psql` is found it creates the database automatically; if not but Docker is available it starts a `sky2nite-db` container on port 5432; otherwise it prints manual instructions
 - Install dependencies and build both client and server
 - Copy the client bundle into `server\public`
+- Register a Windows Scheduled Task (`sky2nite`) that starts the app at system boot
+
+> **Elevated permissions required for the scheduled task.** Registering a scheduled task with `/RL HIGHEST` requires administrator rights. Right-click PowerShell and choose **Run as administrator** before running `.\setup.ps1` if you want auto-start on boot. If you run without elevation the task registration is skipped and a warning is shown — the rest of the setup completes normally.
+
+You can manage the scheduled task later with:
+
+```powershell
+schtasks /Run    /TN sky2nite       # start
+schtasks /End    /TN sky2nite       # stop
+schtasks /Query  /TN sky2nite       # status
+schtasks /Delete /TN sky2nite /F    # remove
+```
 
 **3. Start the application**
 

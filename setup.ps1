@@ -1,4 +1,4 @@
-#Requires -Version 5.1
+﻿#Requires -Version 5.1
 [CmdletBinding()]
 param()
 
@@ -14,6 +14,9 @@ function Write-Fail { param([string]$Msg) Write-Host "[sky2nite] $Msg" -Foregrou
 $ScriptDir = Split-Path -Parent $MyInvocation.MyCommand.Path
 Set-Location $ScriptDir
 
+# Ensure NODE_ENV is not set to 'production' during build — npm ci skips devDependencies if it is
+Remove-Item Env:NODE_ENV -ErrorAction SilentlyContinue
+
 # ─── Check Node.js ────────────────────────────────────────────────────────────
 if (-not (Get-Command node -ErrorAction SilentlyContinue)) {
     Write-Fail "Node.js is not installed. Install Node.js >= 20.19 from https://nodejs.org"
@@ -27,7 +30,7 @@ $nodeMinor   = [int]$parts[1]
 if ($nodeMajor -lt 20 -or ($nodeMajor -eq 20 -and $nodeMinor -lt 19)) {
     Write-Fail "Node.js >= 20.19 is required (found v$nodeVersion). Upgrade from https://nodejs.org"
 }
-Write-Ok "Node.js v$nodeVersion ✓"
+Write-Ok "Node.js v$nodeVersion"
 
 # ─── Environment files ────────────────────────────────────────────────────────
 if (-not (Test-Path 'server\.env')) {
@@ -55,23 +58,43 @@ if (Get-Command psql -ErrorAction SilentlyContinue) {
         # Test whether the target database is already reachable
         $null = psql $dbUrl -c '\q' 2>$null
         if ($LASTEXITCODE -eq 0) {
-            Write-Ok "Database already reachable ✓"
+            Write-Ok "Database already reachable"
         } else {
             # Swap the database segment to 'postgres' to create sky2nite
             $pgAdminUrl = $dbUrl -replace '/[^/]+$', '/postgres'
             $null = psql $pgAdminUrl -c 'CREATE DATABASE sky2nite;' 2>$null
             if ($LASTEXITCODE -eq 0) {
-                Write-Ok "Database 'sky2nite' created ✓"
+                Write-Ok "Database 'sky2nite' created"
             } else {
                 Write-Warn "Could not auto-create the database. Create it manually then re-run this script:"
                 Write-Warn "  createdb sky2nite"
             }
         }
     }
+} elseif (Get-Command docker -ErrorAction SilentlyContinue) {
+    # No local psql — try to spin up a Postgres container if one isn't already running
+    $existing = docker inspect sky2nite-db 2>&1
+    if ($LASTEXITCODE -eq 0) {
+        Write-Ok "Docker container 'sky2nite-db' already exists"
+    } else {
+        Write-Info "psql not found — starting a PostgreSQL Docker container..."
+        docker run -d `
+            --name sky2nite-db `
+            -e POSTGRES_DB=sky2nite `
+            -e POSTGRES_USER=sky2nite `
+            -e POSTGRES_PASSWORD=sky2nite `
+            -p 5432:5432 `
+            --restart unless-stopped `
+            postgres:17-alpine | Out-Null
+        if ($LASTEXITCODE -eq 0) {
+            Write-Ok "Docker container 'sky2nite-db' started on port 5432"
+        } else {
+            Write-Warn "Failed to start Docker container — start PostgreSQL manually and update server\.env."
+        }
+    }
 } else {
-    Write-Warn "psql not found — skipping automatic database setup."
-    Write-Warn "Install PostgreSQL, then create the database: createdb sky2nite"
-    Write-Warn "Update DATABASE_URL in server\.env before starting the server."
+    Write-Warn "Neither psql nor Docker found — start PostgreSQL manually and update DATABASE_URL in server\.env."
+    Write-Warn "Quickstart with Docker:  docker run -d --name sky2nite-db -e POSTGRES_DB=sky2nite -e POSTGRES_USER=sky2nite -e POSTGRES_PASSWORD=sky2nite -p 5432:5432 postgres:17-alpine"
 }
 
 # ─── Google Maps API key ─────────────────────────────────────────────────────
@@ -94,12 +117,12 @@ if (-not $gmk -or $gmk -eq 'your_api_key_here') {
         }
         Set-Content 'server\.env' $envContent -NoNewline
         $gmk = $gmkInput
-        Write-Ok "Google Maps API key saved to server\.env ✓"
+        Write-Ok "Google Maps API key saved to server\.env"
     } else {
         Write-Warn 'Skipped — address autocomplete will be unavailable.'
     }
 } else {
-    Write-Ok "Google Maps API key loaded from server\.env ✓"
+    Write-Ok "Google Maps API key loaded from server\.env"
 }
 Write-Host ''
 
@@ -119,6 +142,14 @@ if ($LASTEXITCODE -ne 0) { Write-Fail "Failed to build client." }
 Write-Info "Installing server dependencies..."
 npm ci --prefix server
 if ($LASTEXITCODE -ne 0) { Write-Fail "Failed to install server dependencies." }
+
+# ─── Shared ──────────────────────────────────────────────────────────────────
+Write-Info "Building shared types..."
+Push-Location shared
+node ..\server\node_modules\typescript\bin\tsc --build --force tsconfig.json
+$sharedResult = $LASTEXITCODE
+Pop-Location
+if ($sharedResult -ne 0) { Write-Fail "Failed to build shared types." }
 
 Write-Info "Building server..."
 npm run build --prefix server
@@ -154,20 +185,25 @@ Set-Location '$($appDir -replace "'","''")'
 Write-Info "Registering Windows Scheduled Task '$taskName'..."
 
 # Remove existing task so we can recreate it cleanly
-schtasks /Delete /TN $taskName /F 2>$null | Out-Null
+$ErrorActionPreference = 'SilentlyContinue'
+schtasks /Delete /TN $taskName /F 2>&1 | Out-Null
+$ErrorActionPreference = 'Stop'
 
 $action  = "powershell.exe -NonInteractive -WindowStyle Hidden -ExecutionPolicy Bypass -File `"$launcherPath`""
+$ErrorActionPreference = 'SilentlyContinue'
 $result  = schtasks /Create /TN $taskName /TR $action /SC ONSTART /RU "$env:USERNAME" /RL HIGHEST /F 2>&1
-if ($LASTEXITCODE -ne 0) {
+$schtasksExit = $LASTEXITCODE
+$ErrorActionPreference = 'Stop'
+if ($schtasksExit -ne 0) {
     Write-Warn "Could not register scheduled task (may need elevation). Start manually:"
     Write-Warn "  cd server; `$env:NODE_ENV = 'production'; node dist/index.js"
 } else {
-    Write-Ok "Scheduled task '$taskName' registered (runs at system startup) ✓"
+    Write-Ok "Scheduled task '$taskName' registered (runs at system startup)"
 
     # Start it now
     schtasks /Run /TN $taskName | Out-Null
     Start-Sleep -Seconds 2
-    Write-Ok "sky2nite started ✓"
+    Write-Ok "sky2nite started"
 
     Write-Host ""
     Write-Host "  Manage the service:" -ForegroundColor White

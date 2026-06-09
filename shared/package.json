@@ -1,6 +1,14 @@
 {
-  "name": "sky2nite-shared",
+  "name": "shared",
   "version": "1.0.0",
   "description": "Types shared between client and server",
-  "private": true
+  "private": true,
+  "type": "module",
+  "exports": {
+    "./types.js": "./dist/types.js",
+    "./userSettings.js": "./dist/userSettings.js"
+  },
+  "scripts": {
+    "build": "tsc --build tsconfig.json"
+  }
 }

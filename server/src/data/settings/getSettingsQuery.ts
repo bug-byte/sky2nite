@@ -1,8 +1,8 @@
 import pool from '../../services/db.js';
-import { DEFAULT_USER_SETTINGS } from '../../../../shared/src/userSettings.js';
+import { DEFAULT_USER_SETTINGS } from 'shared/userSettings.js';
 import {
   type UserSettings,
-} from '../../../../shared/src/types.js';
+} from 'shared/types.js';
 
 export async function getSettingsQuery(userId: number): Promise<UserSettings> {
   const result = await pool.query<{
