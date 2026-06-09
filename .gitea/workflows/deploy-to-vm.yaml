@@ -68,13 +68,17 @@ jobs:
             echo "=== Git operation completed ==="
           GITSCRIPT
 
+      - name: Install Docker Compose plugin
+        run: |
+          ssh -T deploy-vm 'docker compose version 2>/dev/null || (sudo apt-get update -qq && sudo apt-get install -y -qq docker-compose-plugin)'
+
       - name: Pull PostgreSQL image
         run: |
-          ssh -T deploy-vm 'cd $HOME/sky2nite && docker-compose pull db'
+          ssh -T deploy-vm 'cd $HOME/sky2nite && docker compose pull db'
 
       - name: Build and restart application containers
         run: |
-          ssh -T deploy-vm 'cd $HOME/sky2nite && docker-compose up --build -d'
+          ssh -T deploy-vm 'cd $HOME/sky2nite && docker compose up --build -d'
 
       - name: Clean up unused Docker images
         run: |
