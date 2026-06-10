@@ -31,6 +31,10 @@ jobs:
           fi
           echo "All GitHub secrets are set."
 
+      - name: Fetch all branches
+        run: |
+          git fetch origin '+refs/heads/*:refs/heads/*' '+refs/tags/*:refs/tags/*'
+
       - name: Push mirror to GitHub
         run: |
           git remote add github \
