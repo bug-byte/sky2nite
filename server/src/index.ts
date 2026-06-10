@@ -29,8 +29,11 @@ app.use(helmet({
   contentSecurityPolicy: {
     directives: {
       ...helmet.contentSecurityPolicy.getDefaultDirectives(),
-      'img-src': ["'self'", 'data:', 'https://alasky.cds.unistra.fr'],
-      'upgrade-insecure-requests': null, // disable — breaks LAN/dev access over plain HTTP
+      'script-src': ["'self'", 'https://maps.googleapis.com', 'https://maps.gstatic.com'],
+      'script-src-elem': ["'self'", 'https://maps.googleapis.com', 'https://maps.gstatic.com'],
+      'img-src': ["'self'", 'data:', 'https://alasky.cds.unistra.fr', 'https://maps.gstatic.com', 'https://maps.googleapis.com'],
+      'connect-src': ["'self'", 'https://maps.googleapis.com'],
+      'upgrade-insecure-requests': null,
     },
   },
 }));
