@@ -33,6 +33,7 @@ jobs:
 
       - name: Fetch all branches
         run: |
+          git checkout --detach
           git fetch origin '+refs/heads/*:refs/heads/*' '+refs/tags/*:refs/tags/*'
 
       - name: Push mirror to GitHub
