@@ -61,9 +61,13 @@ Key variables:
 | `AUTH_TOKEN_TTL` | Login token lifetime (default `7d`) |
 | `ANTARES_API_BASE_URL` | ANTARES broker API base URL |
 | `CACHE_TTL_SECONDS` | How long to cache ANTARES responses |
+| `FRONTEND_URL` | *(Optional)* Restricts CORS to a specific origin (e.g. `https://sky2nite.example.com`). Unset = same-origin only. |
 | `VITE_GOOGLE_MAPS_API_KEY` | *(Optional)* Google Maps API key for address autocomplete |
 
-> **Google Maps API key** — if omitted, address autocomplete is disabled and users can still enter coordinates manually. The key is read from `server/.env` and baked into the client bundle at build time.
+> **Google Maps API key** — if omitted, address autocomplete is disabled and users can still enter coordinates manually.  
+> - **Docker setup:** put the key in `server/.env` and pass it with `--env-file server/.env` so the build step bakes it into the client bundle.  
+> - **Local dev:** put the key in `client/.env` instead (`VITE_GOOGLE_MAPS_API_KEY=...`). The Vite dev server reads it at build time.  
+> - **Production host setup:** set the environment variable in the shell before building, or export it in a root `.env` file for Docker Compose to pick up automatically.
 
 ---
 
