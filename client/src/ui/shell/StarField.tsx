@@ -204,12 +204,6 @@ export default function StarField() {
         ctx.fill();
       }
 
-      // Debug: draw a bright marker to confirm canvas renders on screen
-      ctx.fillStyle = '#ff0';
-      ctx.beginPath();
-      ctx.arc(50, 50, 20, 0, Math.PI * 2);
-      ctx.fill();
-
       animFrameId = requestAnimationFrame(draw);
     };
 
