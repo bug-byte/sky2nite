@@ -74,8 +74,8 @@ export default function StarField() {
         return {
           x: Math.random() * canvas.width,
           y: Math.random() * canvas.height,
-          radius: 0.8 + Math.random() * 1.7,
-          baseOpacity: 0.3 + Math.random() * 0.7,
+          radius: 1.2 + Math.random() * 2.3,
+          baseOpacity: 0.55 + Math.random() * 0.45,
           twinkleOffset: Math.random() * Math.PI * 2,
           twinkleSpeed: 0.2 + Math.random() * 0.6,
           vx: Math.cos(angle) * speed,
@@ -124,8 +124,7 @@ export default function StarField() {
         else if (star.y > canvas.height + 2) star.y = -2;
       }
 
-      // Collision detection — throttled to every 3rd frame (stars move <1px/frame,
-      // so missed frames produce zero visible difference)
+      // Collision detection — throttled to every 3rd frame
       if (frameCount % 3 === 0) {
         for (let i = 0; i < stars.length; i++) {
           for (let j = i + 1; j < stars.length; j++) {
@@ -189,7 +188,7 @@ export default function StarField() {
         const twinkle = 0.15 * Math.sin(t * star.twinkleSpeed * Math.PI * 2 + star.twinkleOffset);
         const opacity = Math.max(0.05, Math.min(1, star.baseOpacity + twinkle));
 
-        // Soft glow halo for larger stars — drawn via pre-rendered sprite (no per-star gradient)
+        // Soft glow halo for larger stars
         if (star.radius > 1.4) {
           const glowR = star.radius * 3.5;
           const d = glowR * 2;
@@ -198,12 +197,18 @@ export default function StarField() {
           ctx.globalAlpha = 1;
         }
 
-        // Core star dot (slightly blue-white tint)
+        // Core star dot
         ctx.beginPath();
         ctx.arc(star.x, star.y, star.radius, 0, Math.PI * 2);
-        ctx.fillStyle = `rgba(215, 230, 255, ${opacity})`;
+        ctx.fillStyle = `rgba(255, 255, 255, ${opacity})`;
         ctx.fill();
       }
+
+      // Debug: draw a bright marker to confirm canvas renders on screen
+      ctx.fillStyle = '#ff0';
+      ctx.beginPath();
+      ctx.arc(50, 50, 20, 0, Math.PI * 2);
+      ctx.fill();
 
       animFrameId = requestAnimationFrame(draw);
     };
@@ -228,7 +233,7 @@ export default function StarField() {
         width: '100%',
         height: '100%',
         pointerEvents: 'none',
-        zIndex: -1,
+        zIndex: 0,
       }}
     />
   );
