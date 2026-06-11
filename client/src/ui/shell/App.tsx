@@ -457,6 +457,10 @@ function App() {
             {t('MESSAGE.AND_THE')}{' '}
             <Link href="https://rubinobservatory.org/" target="_blank" rel="noopener">Vera C. Rubin Observatory</Link>
             {' — '}{t('MESSAGE.WRITTEN_BY')}
+            {' — '}
+            <Link href="https://buymeacoffee.com/bugbyte24" target="_blank" rel="noopener noreferrer">
+              {t('COMMAND.BUY_ME_A_BEER')}
+            </Link>
           </Typography>
         </Container>
       </Box>

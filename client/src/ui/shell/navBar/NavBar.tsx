@@ -21,6 +21,7 @@ import {
   NightsStay as NightsStayIcon,
   Settings as SettingsIcon,
   BookmarkAdded as BookmarkAddedIcon,
+  SportsBar as SportsBarIcon,
 } from '@mui/icons-material'
 import { type ReactElement } from 'react'
 import { useNavigate, useLocation } from 'react-router-dom'
@@ -136,6 +137,21 @@ export default function NavBar({
             </Button>
           </Box>
 
+          <Tooltip title={t('COMMAND.BUY_ME_A_BEER')}>
+            <IconButton
+              color="inherit"
+              component="a"
+              href="https://buymeacoffee.com/bugbyte24"
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label={t('COMMAND.BUY_ME_A_BEER')}
+              size="small"
+              sx={{ color: 'rgba(255,255,255,0.7)', '&:hover': { color: '#fff' } }}
+            >
+              <SportsBarIcon fontSize="small" />
+            </IconButton>
+          </Tooltip>
+
           <Tooltip title={t('COMMAND.ABOUT')}>
             <IconButton color="inherit" onClick={onAboutOpen} aria-label={t('COMMAND.ABOUT')} size="small">
               <InfoOutlinedIcon fontSize="small" />
@@ -207,6 +223,25 @@ export default function NavBar({
             </ListItemIcon>
             <ListItemText
               primary={`Sign out (${authUser.username})`}
+              primaryTypographyProps={{ fontSize: '0.875rem' }}
+            />
+          </ListItemButton>
+        </List>
+        <Divider sx={{ borderColor: 'rgba(255,255,255,0.1)' }} />
+        <List disablePadding>
+          <ListItemButton
+            component="a"
+            href="https://buymeacoffee.com/bugbyte24"
+            target="_blank"
+            rel="noopener noreferrer"
+            onClick={onDrawerClose}
+            sx={{ '&:hover': { background: 'rgba(255,255,255,0.07)' } }}
+          >
+            <ListItemIcon sx={{ color: 'inherit', minWidth: 36 }}>
+              <SportsBarIcon fontSize="small" />
+            </ListItemIcon>
+            <ListItemText
+              primary={t('COMMAND.BUY_ME_A_BEER')}
               primaryTypographyProps={{ fontSize: '0.875rem' }}
             />
           </ListItemButton>

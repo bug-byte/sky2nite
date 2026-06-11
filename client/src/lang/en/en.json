@@ -24,7 +24,8 @@
     "CLOSE": "Close",
     "MY_NOTES": "My Notes",
     "SAVE": "Save",
-    "SEARCH": "Search"
+    "SEARCH": "Search",
+    "BUY_ME_A_BEER": "Buy me a beer"
   },
   "ERROR": {
     "GEOLOCATION_NOT_SUPPORTED": "Geolocation is not supported by your browser",
