@@ -18,4 +18,5 @@ export const DEFAULT_RARE_CLASSIFICATION_SETTINGS: RareClassificationSettings = 
 export const DEFAULT_USER_SETTINGS: UserSettings = {
   particlesEnabled: true,
   rareClassifications: DEFAULT_RARE_CLASSIFICATION_SETTINGS,
+  guestModeEnabled: false,
 }

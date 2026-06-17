@@ -25,7 +25,8 @@
     "MY_NOTES": "My Notes",
     "SAVE": "Save",
     "SEARCH": "Search",
-    "BUY_ME_A_BEER": "Buy me a beer"
+    "BUY_ME_A_BEER": "Buy me a beer",
+    "SIGN_IN": "Sign In"
   },
   "ERROR": {
     "GEOLOCATION_NOT_SUPPORTED": "Geolocation is not supported by your browser",
@@ -112,6 +113,7 @@
     "CONFIRM_NEW_PASSWORD": "Confirm New Password",
     "APPEARANCE": "Appearance",
     "PARTICLE_EFFECTS": "Particle Effects",
+    "GUEST_MODE": "Guest Mode",
     "RARE_CLASSIFICATION_HIGHLIGHTING": "Rare Classification Highlighting",
     "RARE_CLASSIFICATION_TAGS": "Rare Tags",
     "RARE_CLASSIFICATION_TAGS_PLACEHOLDER": "Type a tag or choose from the list",
@@ -162,6 +164,7 @@
     "SETTINGS_DESCRIPTION": "Manage app settings and login credentials.",
     "APPEARANCE_DESCRIPTION": "Customize the visual experience of the app.",
     "PARTICLE_EFFECTS_DESCRIPTION": "Animated star field with collision effects. Disable to reduce GPU usage.",
+    "GUEST_MODE_DESCRIPTION": "Allow unauthenticated visitors to browse tonight's objects without signing in.",
     "RARE_CLASSIFICATION_DESCRIPTION": "Choose which classifications should be highlighted as rare or high-interest, and pick the color palette for their badges.",
     "RARE_CLASSIFICATION_TAGS_HELP": "Select from the ANTARES object types list or type your own tag.",
     "RARE_CLASSIFICATION_UPDATED": "Rare classification settings saved.",

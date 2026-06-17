@@ -16,6 +16,7 @@ import {
 import {
   TravelExplore as TravelExploreIcon,
   InfoOutlined as InfoOutlinedIcon,
+  Login as LoginIcon,
   Logout as LogoutIcon,
   Menu as MenuIcon,
   NightsStay as NightsStayIcon,
@@ -28,18 +29,23 @@ import { useNavigate, useLocation } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import type { AuthUser } from '../../../services/api'
 
-const NAV_ITEMS: { path: string; labelKey: string; icon: ReactElement }[] = [
+const AUTH_NAV_ITEMS: { path: string; labelKey: string; icon: ReactElement }[] = [
   { path: '/', labelKey: 'LABEL.NAV_OBSERVATIONS', icon: <NightsStayIcon fontSize="small" /> },
   { path: '/my-observations', labelKey: 'LABEL.NAV_MY_OBSERVATIONS', icon: <BookmarkAddedIcon fontSize="small" /> },
   { path: '/settings', labelKey: 'LABEL.NAV_SETTINGS', icon: <SettingsIcon fontSize="small" /> },
+]
+
+const GUEST_NAV_ITEMS: { path: string; labelKey: string; icon: ReactElement }[] = [
+  { path: '/', labelKey: 'LABEL.NAV_OBSERVATIONS', icon: <NightsStayIcon fontSize="small" /> },
 ]
 
 type NavBarProps = {
   drawerOpen: boolean
   onDrawerOpen: () => void
   onDrawerClose: () => void
-  authUser: AuthUser
+  authUser: AuthUser | null
   onLogout: () => void
+  onSignIn: () => void
   onAboutOpen: () => void
 }
 
@@ -49,11 +55,14 @@ export default function NavBar({
   onDrawerClose,
   authUser,
   onLogout,
+  onSignIn,
   onAboutOpen,
 }: NavBarProps) {
   const { t, i18n } = useTranslation()
   const navigate = useNavigate()
   const location = useLocation()
+
+  const navItems = authUser ? AUTH_NAV_ITEMS : GUEST_NAV_ITEMS
 
   const isActive = (path: string) =>
     path === '/' ? location.pathname === '/' : location.pathname.startsWith(path)
@@ -94,7 +103,7 @@ export default function NavBar({
           </Box>
 
           <Box sx={{ display: { xs: 'none', md: 'flex' }, gap: 0.5, ml: 2, flexGrow: 1 }}>
-            {NAV_ITEMS.map((item) => (
+            {navItems.map((item) => (
               <Button
                 key={item.path}
                 color="inherit"
@@ -158,26 +167,53 @@ export default function NavBar({
             </IconButton>
           </Tooltip>
 
-          <Tooltip title={`${authUser.username} — Logout`}>
-            <IconButton
-              color="inherit"
-              onClick={onLogout}
-              aria-label="Logout"
-              size="small"
-              sx={{ display: { xs: 'inline-flex', sm: 'none' } }}
-            >
-              <LogoutIcon fontSize="small" />
-            </IconButton>
-          </Tooltip>
-          <Button
-            color="inherit"
-            onClick={onLogout}
-            size="small"
-            startIcon={<LogoutIcon fontSize="small" />}
-            sx={{ display: { xs: 'none', sm: 'inline-flex' }, ml: 0.5, fontSize: '0.8rem', textTransform: 'none', whiteSpace: 'nowrap' }}
-          >
-            {authUser.username}
-          </Button>
+          {authUser ? (
+            <>
+              <Tooltip title={`${authUser.username} — Logout`}>
+                <IconButton
+                  color="inherit"
+                  onClick={onLogout}
+                  aria-label="Logout"
+                  size="small"
+                  sx={{ display: { xs: 'inline-flex', sm: 'none' } }}
+                >
+                  <LogoutIcon fontSize="small" />
+                </IconButton>
+              </Tooltip>
+              <Button
+                color="inherit"
+                onClick={onLogout}
+                size="small"
+                startIcon={<LogoutIcon fontSize="small" />}
+                sx={{ display: { xs: 'none', sm: 'inline-flex' }, ml: 0.5, fontSize: '0.8rem', textTransform: 'none', whiteSpace: 'nowrap' }}
+              >
+                {authUser.username}
+              </Button>
+            </>
+          ) : (
+            <>
+              <Tooltip title={t('COMMAND.SIGN_IN')}>
+                <IconButton
+                  color="inherit"
+                  onClick={onSignIn}
+                  aria-label={t('COMMAND.SIGN_IN')}
+                  size="small"
+                  sx={{ display: { xs: 'inline-flex', sm: 'none' } }}
+                >
+                  <LoginIcon fontSize="small" />
+                </IconButton>
+              </Tooltip>
+              <Button
+                color="inherit"
+                onClick={onSignIn}
+                size="small"
+                startIcon={<LoginIcon fontSize="small" />}
+                sx={{ display: { xs: 'none', sm: 'inline-flex' }, ml: 0.5, fontSize: '0.8rem', textTransform: 'none', whiteSpace: 'nowrap' }}
+              >
+                {t('COMMAND.SIGN_IN')}
+              </Button>
+            </>
+          )}
         </Toolbar>
       </AppBar>
 
@@ -200,7 +236,7 @@ export default function NavBar({
         </Box>
         <Divider sx={{ borderColor: 'rgba(255,255,255,0.1)' }} />
         <List disablePadding>
-          {NAV_ITEMS.map((item) => (
+          {navItems.map((item) => (
             <ListItemButton
               key={item.path}
               selected={isActive(item.path)}
@@ -217,15 +253,27 @@ export default function NavBar({
         </List>
         <Divider sx={{ borderColor: 'rgba(255,255,255,0.1)' }} />
         <List disablePadding>
-          <ListItemButton onClick={onLogout} sx={{ '&:hover': { background: 'rgba(255,255,255,0.07)' } }}>
-            <ListItemIcon sx={{ color: 'inherit', minWidth: 36 }}>
-              <LogoutIcon fontSize="small" />
-            </ListItemIcon>
-            <ListItemText
-              primary={`Sign out (${authUser.username})`}
-              primaryTypographyProps={{ fontSize: '0.875rem' }}
-            />
-          </ListItemButton>
+          {authUser ? (
+            <ListItemButton onClick={onLogout} sx={{ '&:hover': { background: 'rgba(255,255,255,0.07)' } }}>
+              <ListItemIcon sx={{ color: 'inherit', minWidth: 36 }}>
+                <LogoutIcon fontSize="small" />
+              </ListItemIcon>
+              <ListItemText
+                primary={`Sign out (${authUser.username})`}
+                primaryTypographyProps={{ fontSize: '0.875rem' }}
+              />
+            </ListItemButton>
+          ) : (
+            <ListItemButton onClick={() => { onSignIn(); onDrawerClose(); }} sx={{ '&:hover': { background: 'rgba(255,255,255,0.07)' } }}>
+              <ListItemIcon sx={{ color: 'inherit', minWidth: 36 }}>
+                <LoginIcon fontSize="small" />
+              </ListItemIcon>
+              <ListItemText
+                primary={t('COMMAND.SIGN_IN')}
+                primaryTypographyProps={{ fontSize: '0.875rem' }}
+              />
+            </ListItemButton>
+          )}
         </List>
         <Divider sx={{ borderColor: 'rgba(255,255,255,0.1)' }} />
         <List disablePadding>

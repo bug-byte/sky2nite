@@ -1,5 +1,5 @@
 import { useState, useRef, useMemo, useEffect, useCallback } from 'react'
-import { Routes, Route } from 'react-router-dom'
+import { Routes, Route, Navigate } from 'react-router-dom'
 import PageTransition from './PageTransition'
 import StarField from './StarField'
 import { useTranslation } from 'react-i18next'
@@ -41,6 +41,8 @@ function App() {
   const [authLoading, setAuthLoading] = useState(true);
   const [authError, setAuthError] = useState<string | null>(null);
   const [authUser, setAuthUser] = useState<AuthUser | null>(null);
+  const [guestModeEnabled, setGuestModeEnabled] = useState(false);
+  const [signingIn, setSigningIn] = useState(false);
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [filtersVisible, setFiltersVisible] = useState(true);
   const [particlesEnabled, setParticlesEnabled] = useState(true);
@@ -56,7 +58,7 @@ function App() {
     searchRequest,
     searchRequest !== null,
   );
-  const { data: availableTags = [] } = useAvailableTags(Boolean(authUser));
+  const { data: availableTags = [] } = useAvailableTags(Boolean(authUser) || guestModeEnabled);
   const savedObservationsQuery = useSavedObservations(Boolean(authUser));
   const savedObservations = savedObservationsQuery.data ?? [];
   const saveObservation = useSaveObservation();
@@ -93,9 +95,13 @@ function App() {
       setAuthError(null);
 
       try {
-        const status = await api.getSetupStatus();
+        const [status, guestMode] = await Promise.all([
+          api.getSetupStatus(),
+          api.getGuestModeStatus().catch(() => ({ guestModeEnabled: false })),
+        ]);
         if (cancelled) return;
 
+        setGuestModeEnabled(guestMode.guestModeEnabled);
         const nextMode = status.isSetupComplete ? "login" : "setup";
         setAuthMode(nextMode);
 
@@ -110,8 +116,9 @@ function App() {
               const settings = await api.getSettings();
               if (!cancelled) setParticlesEnabled(settings.particlesEnabled);
               if (!cancelled) setRareClassificationSettings(settings.rareClassifications);
+              if (!cancelled) setGuestModeEnabled(settings.guestModeEnabled);
             } catch {
-              // settings fetch failing is non-fatal; keep default (true)
+              // settings fetch failing is non-fatal; keep defaults
             }
           } catch {
             api.clearAuthToken();
@@ -150,6 +157,7 @@ function App() {
           : await api.login(username, password);
       setAuthMode("login");
       setAuthUser(user);
+      setSigningIn(false);
     } catch (e) {
       setAuthError(e instanceof Error ? e.message : "Authentication failed.");
     } finally {
@@ -165,10 +173,11 @@ function App() {
     setCursors([0]);
   };
 
-  const handleSettingsChange = async (patch: Partial<{ particlesEnabled: boolean; rareClassifications: RareClassificationSettings }>) => {
+  const handleSettingsChange = async (patch: Partial<{ particlesEnabled: boolean; rareClassifications: RareClassificationSettings; guestModeEnabled: boolean }>) => {
     const updated = await api.updateSettings(patch);
     setParticlesEnabled(updated.particlesEnabled);
     setRareClassificationSettings(updated.rareClassifications);
+    setGuestModeEnabled(updated.guestModeEnabled);
   };
 
   const filteredObjects = useMemo(() => {
@@ -348,7 +357,7 @@ function App() {
     });
   };
 
-  if (!authUser) {
+  if (!authUser && (!guestModeEnabled || signingIn)) {
     return (
       <>
         {particlesEnabled && <StarField />}
@@ -357,6 +366,7 @@ function App() {
           loading={authLoading}
           error={authError}
           onSubmit={handleAuthenticate}
+          onCancel={signingIn ? () => { setSigningIn(false); setAuthError(null); } : undefined}
         />
       </>
     );
@@ -371,6 +381,7 @@ function App() {
         onDrawerClose={() => setDrawerOpen(false)}
         authUser={authUser}
         onLogout={handleLogout}
+        onSignIn={() => setSigningIn(true)}
         onAboutOpen={() => setAboutOpen(true)}
       />
 
@@ -411,15 +422,15 @@ function App() {
               onSearchByName={handleSearchByName}
             />
           } />
-          <Route path="/my-observations" element={
+          {authUser && <Route path="/my-observations" element={
             <MyObservationsPage
               observations={savedObservations}
               isLoading={savedObservationsQuery.isLoading}
               error={savedObservationsQuery.error}
               rareClassificationSettings={rareClassificationSettings}
             />
-          } />
-          <Route path="/settings" element={
+          } />}
+          {authUser && <Route path="/settings" element={
             <Container maxWidth="lg" sx={{ mt: 4, mb: 4, px: { xs: 2, md: 3 } }}>
               <SettingsPage
                 authUser={authUser}
@@ -433,9 +444,14 @@ function App() {
                 onParticlesToggle={async (enabled) => {
                   await handleSettingsChange({ particlesEnabled: enabled });
                 }}
+                guestModeEnabled={guestModeEnabled}
+                onGuestModeToggle={async (enabled) => {
+                  await handleSettingsChange({ guestModeEnabled: enabled });
+                }}
               />
             </Container>
-          } />
+          } />}
+          {!authUser && <Route path="*" element={<Navigate to="/" replace />} />}
         </Routes>
       </PageTransition>
 

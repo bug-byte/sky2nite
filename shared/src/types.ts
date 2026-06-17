@@ -10,6 +10,7 @@ export type RareClassificationSettings = {
 export type UserSettings = {
   particlesEnabled: boolean
   rareClassifications: RareClassificationSettings
+  guestModeEnabled: boolean
 }
 
 export type AuthUser = {

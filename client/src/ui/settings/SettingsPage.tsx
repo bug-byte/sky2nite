@@ -33,6 +33,8 @@ type SettingsPageProps = {
   onRareClassificationSettingsChange: (settings: RareClassificationSettings) => Promise<void>
   particlesEnabled: boolean
   onParticlesToggle: (enabled: boolean) => Promise<void>
+  guestModeEnabled: boolean
+  onGuestModeToggle: (enabled: boolean) => Promise<void>
 }
 
 const RARE_CLASSIFICATION_COLOR_MAP_OPTIONS: Array<{ value: RareClassificationColorMapId; label: string }> = [
@@ -435,9 +437,12 @@ export default function SettingsPage({
   onRareClassificationSettingsChange,
   particlesEnabled,
   onParticlesToggle,
+  guestModeEnabled,
+  onGuestModeToggle,
 }: SettingsPageProps) {
   const { t } = useTranslation()
   const [particlesLoading, setParticlesLoading] = useState(false)
+  const [guestModeLoading, setGuestModeLoading] = useState(false)
 
   const handleParticlesToggle = async () => {
     setParticlesLoading(true)
@@ -445,6 +450,15 @@ export default function SettingsPage({
       await onParticlesToggle(!particlesEnabled)
     } finally {
       setParticlesLoading(false)
+    }
+  }
+
+  const handleGuestModeToggle = async () => {
+    setGuestModeLoading(true)
+    try {
+      await onGuestModeToggle(!guestModeEnabled)
+    } finally {
+      setGuestModeLoading(false)
     }
   }
 
@@ -502,6 +516,25 @@ export default function SettingsPage({
                   <Typography variant="body2">{t('LABEL.PARTICLE_EFFECTS')}</Typography>
                   <Typography variant="caption" color="text.secondary">
                     {t('MESSAGE.PARTICLE_EFFECTS_DESCRIPTION')}
+                  </Typography>
+                </Box>
+              }
+            />
+            <Divider sx={{ borderColor: 'rgba(255,255,255,0.08)', my: 1 }} />
+            <FormControlLabel
+              control={
+                <Switch
+                  checked={guestModeEnabled}
+                  onChange={() => void handleGuestModeToggle()}
+                  disabled={guestModeLoading}
+                  color="primary"
+                />
+              }
+              label={
+                <Box>
+                  <Typography variant="body2">{t('LABEL.GUEST_MODE')}</Typography>
+                  <Typography variant="caption" color="text.secondary">
+                    {t('MESSAGE.GUEST_MODE_DESCRIPTION')}
                   </Typography>
                 </Box>
               }

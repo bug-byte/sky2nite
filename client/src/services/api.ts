@@ -91,6 +91,10 @@ export const api = {
     return requestEnvelope(apiClient.get<ApiEnvelope<SetupStatusResponse>>('/auth/setup-status'));
   },
 
+  getGuestModeStatus: async (): Promise<{ guestModeEnabled: boolean }> => {
+    return requestEnvelope(apiClient.get<ApiEnvelope<{ guestModeEnabled: boolean }>>('/auth/guest-mode'));
+  },
+
   setupFirstUser: async (username: string, password: string): Promise<AuthUser> => {
     const result = await requestEnvelope(apiClient.post<ApiEnvelope<AuthResponse>>('/auth/setup', { username, password }));
     storeAuthToken(result.token);

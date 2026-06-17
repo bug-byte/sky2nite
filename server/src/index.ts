@@ -7,7 +7,7 @@ import path from 'path';
 import { fileURLToPath } from 'url';
 import './config/loadEnv.js';
 import { authRouter } from './api/auth/authRouter.js';
-import { requireAuth } from './api/auth/authMiddleware.js';
+import { requireAuth, requireAuthOrGuestMode } from './api/auth/authMiddleware.js';
 import { objectsRouter } from './api/objects/objectsRouter.js';
 import { observationsRouter } from './api/observations/observationsRouter.js';
 import { settingsRouter } from './api/settings/settingsRouter.js';
@@ -68,7 +68,7 @@ app.use((req, _res, next) => {
 });
 
 app.use('/api/auth', authLimiter, authRouter);
-app.use('/api/objects', requireAuth, objectsRouter);
+app.use('/api/objects', requireAuthOrGuestMode, objectsRouter);
 app.use('/api/observations', requireAuth, observationsRouter);
 app.use('/api/settings', requireAuth, settingsRouter);
 app.use('/api/filter-presets', requireAuth, filterPresetsRouter);

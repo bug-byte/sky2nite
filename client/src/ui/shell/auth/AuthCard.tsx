@@ -17,9 +17,10 @@ type AuthCardProps = {
   loading: boolean;
   error: string | null;
   onSubmit: (username: string, password: string) => Promise<void>;
+  onCancel?: () => void;
 }
 
-function AuthCard({ mode, loading, error, onSubmit }: AuthCardProps) {
+function AuthCard({ mode, loading, error, onSubmit, onCancel }: AuthCardProps) {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
@@ -150,6 +151,18 @@ function AuthCard({ mode, loading, error, onSubmit }: AuthCardProps) {
                 >
                   {isSetup ? "Create account" : "Sign in"}
                 </Button>
+                {onCancel && (
+                  <Button
+                    variant="text"
+                    size="small"
+                    onClick={onCancel}
+                    disabled={loading}
+                    fullWidth
+                    sx={{ color: 'text.secondary', textTransform: 'none' }}
+                  >
+                    Continue as guest
+                  </Button>
+                )}
               </Stack>
             </Box>
           </Stack>

@@ -6,6 +6,7 @@ import { loginCommand } from '../../data/auth/loginCommand.js';
 import { getMeQuery } from '../../data/auth/getMeQuery.js';
 import { updateUsernameCommand } from '../../data/auth/updateUsernameCommand.js';
 import { updatePasswordCommand } from '../../data/auth/updatePasswordCommand.js';
+import { getGuestModeQuery } from '../../data/auth/getGuestModeQuery.js';
 import { requireAuth } from './authMiddleware.js';
 import type { AuthenticatedRequest } from './authMiddleware.js';
 
@@ -14,6 +15,11 @@ const authRouter = Router();
 authRouter.get(
   '/setup-status',
   responder(() => getSetupStatusQuery()),
+);
+
+authRouter.get(
+  '/guest-mode',
+  responder(() => getGuestModeQuery()),
 );
 
 authRouter.post(

@@ -25,7 +25,8 @@
     "MY_NOTES": "Mes notes",
     "SAVE": "Enregistrer",
     "SEARCH": "Rechercher",
-    "BUY_ME_A_BEER": "Offrez-moi une bière"
+    "BUY_ME_A_BEER": "Offrez-moi une bière",
+    "SIGN_IN": "Se connecter"
   },
   "ERROR": {
     "GEOLOCATION_NOT_SUPPORTED": "La géolocalisation n'est pas prise en charge par votre navigateur",
@@ -112,6 +113,7 @@
     "CONFIRM_NEW_PASSWORD": "Confirmer le nouveau mot de passe",
     "APPEARANCE": "Apparence",
     "PARTICLE_EFFECTS": "Effets de particules",
+    "GUEST_MODE": "Mode invité",
     "RARE_CLASSIFICATION_HIGHLIGHTING": "Mise en évidence des classifications rares",
     "RARE_CLASSIFICATION_TAGS": "Étiquettes rares",
     "RARE_CLASSIFICATION_TAGS_PLACEHOLDER": "Saisissez une étiquette ou choisissez dans la liste",
@@ -169,6 +171,7 @@
     "PRESET_UPDATE_OVERWRITE": "Un préréglage nommé « {{name}} » existe déjà. Le mettre à jour avec les filtres actuels ?",
     "APPEARANCE_DESCRIPTION": "Personnalisez l'expérience visuelle de l'application.",
     "PARTICLE_EFFECTS_DESCRIPTION": "Champ d'étoiles animé avec effets de collision. Désactiver pour réduire l'utilisation GPU.",
+    "GUEST_MODE_DESCRIPTION": "Autoriser les visiteurs non authentifiés à consulter les objets de ce soir sans se connecter.",
     "RARE_CLASSIFICATION_DESCRIPTION": "Choisissez quelles classifications doivent être mises en évidence comme rares ou intéressantes, puis sélectionnez la palette de couleurs de leurs badges.",
     "RARE_CLASSIFICATION_TAGS_HELP": "Sélectionnez une étiquette dans la liste des types d'objets ANTARES ou saisissez votre propre étiquette.",
     "RARE_CLASSIFICATION_UPDATED": "Paramètres des classifications rares enregistrés.",

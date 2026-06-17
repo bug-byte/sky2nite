@@ -9,8 +9,9 @@ export async function getSettingsQuery(userId: number): Promise<UserSettings> {
     particles_enabled: boolean
     rare_classification_tags: string[]
     rare_classification_color_map: string
+    guest_mode_enabled: boolean
   }>(
-    `SELECT particles_enabled, rare_classification_tags, rare_classification_color_map
+    `SELECT particles_enabled, rare_classification_tags, rare_classification_color_map, guest_mode_enabled
      FROM user_settings WHERE user_id = $1`,
     [userId],
   );
@@ -25,5 +26,6 @@ export async function getSettingsQuery(userId: number): Promise<UserSettings> {
       rareClassificationTags: result.rows[0].rare_classification_tags ?? DEFAULT_USER_SETTINGS.rareClassifications.rareClassificationTags,
       rareClassificationColorMap: (result.rows[0].rare_classification_color_map as UserSettings['rareClassifications']['rareClassificationColorMap']) ?? DEFAULT_USER_SETTINGS.rareClassifications.rareClassificationColorMap,
     },
+    guestModeEnabled: result.rows[0].guest_mode_enabled ?? false,
   };
 }
