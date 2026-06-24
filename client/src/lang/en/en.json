@@ -36,6 +36,7 @@
     "INVALID_LONGITUDE_FORMAT": "Longitude must be a numeric value",
     "LOADING_OBJECTS_FAILED": "Error Loading Objects",
     "LOCATION_FAILED": "Failed to get location: {{message}}",
+    "LOCATION_REQUIRED": "Please enter a location (latitude and longitude) before searching",
     "USERNAME_TOO_SHORT": "Username must be at least 3 characters long.",
     "UPDATE_USERNAME_FAILED": "Failed to update username.",
     "PASSWORD_TOO_SHORT": "New password must be at least 8 characters long.",

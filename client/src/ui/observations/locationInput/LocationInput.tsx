@@ -135,7 +135,7 @@ const LocationInput = forwardRef<LocationInputHandle, LocationInputProps>(
       const trimmedLongitude = longitude.trim();
 
       if (!trimmedLatitude && !trimmedLongitude) {
-        setError("");
+        setError(t("ERROR.LOCATION_REQUIRED"));
         return;
       }
 
